@@ -13,30 +13,34 @@ const players: Ref<Players> = ref([]);
 // const gameStarted: Ref<boolean> = ref(true);
 const gameStarted: Ref<boolean> = ref(false);
 const idCount: Ref<number> = ref(0);
-const playersStorage = computed(() => {
-  const storageValue = localStorage.getItem('playersArray');
-  return storageValue ? JSON.parse(storageValue) : [];
-});
-const gameStartedStorage = computed(() => {
-  const storageValue = localStorage.getItem('gameStarted');
-  return storageValue ? JSON.parse(storageValue) : false;
+const LOCAL_STORAGE_PLAYERS_ARRAY = 'playersArray';
+const LOCAL_STORAGE_GAME_STARTED = 'gameStarted';
+
+const storageData = computed(() => {
+  const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
+  const gameStartedStorageValue = localStorage.getItem(LOCAL_STORAGE_GAME_STARTED);
+
+  return {
+    playersArray: playersArrayStorageValue ? JSON.parse(playersArrayStorageValue) : [],
+    gameStarted: gameStartedStorageValue ? JSON.parse(gameStartedStorageValue) : false
+  };
 });
 
 onMounted(() => {
-  if (playersStorage.value.length > 0) {
-    players.value = playersStorage.value;
+  if (storageData.value.playersArray.length > 0) {
+    players.value = storageData.value.playersArray;
   }
-  gameStarted.value = gameStartedStorage.value;
+  gameStarted.value = storageData.value.gameStarted;
 });
 
-watch(gameStarted, (newValue, oldValue) => {
-  localStorage.setItem('gameStarted', newValue.toString());
+watch(gameStarted, (newValue) => {
+  localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
 });
 
 watch(
   () => players,
-  (newValue, oldValue) => {
-    localStorage.setItem('playersArray', JSON.stringify(newValue.value));
+  (newValue) => {
+    localStorage.setItem(LOCAL_STORAGE_PLAYERS_ARRAY, JSON.stringify(newValue.value));
   },
   { deep: true }
 );
