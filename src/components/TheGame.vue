@@ -1,25 +1,34 @@
 <script setup lang="ts">
-import { type Ref, ref } from 'vue'
-import Players from './Players.vue'
-import Points from './Points.vue'
+import { type Ref, ref } from 'vue';
+import Players from './Players.vue';
+import Points from './Points.vue';
 
-type Player = string | null
-const players: Ref<Player[]> = ref([])
-
+type Player = string | null;
+const players: Ref<{ name: Player; points: number }[]> = ref([]);
+const gameStarted: Ref<boolean> = ref(false);
 function updatePlayers(newPlayer: Player) {
-  console.log('updatePlayers- new list:', newPlayer)
-  players.value.push(newPlayer)
+  players.value.push({ name: newPlayer, points: 0 });
+}
+
+// Players: : { name: string, points: number }[]
+// [ { name: 'Steph', points: 0 }, { name: 'Nico', points: 0 } ];
+
+function startGame() {
+  gameStarted.value = true;
 }
 </script>
 
 <template>
-  <Players @submit="updatePlayers" />
-  {{ players }}
+  <template v-if="!gameStarted">
+    <Players @submit="updatePlayers" />
+    <button type="button" @click="startGame">Commencer la partie</button>
+  </template>
 
-  <Points />
+  <Points :players="players" />
   <footer>
-    <button type="button" onclick="alert('Hello world!')">Reset</button>
-    <button type="button" onclick="alert('Hello world!')">Règles</button>
+    <button type="button" onclick="alert('TODO: reset points!')">Reset points</button>
+    <button type="button" onclick="alert('TODO: reset players')">Reset players</button>
+    <button type="button" onclick="alert('TODO: règles')">Règles</button>
   </footer>
 </template>
 
