@@ -8,14 +8,7 @@ type Props = {
 };
 const props = defineProps<Props>();
 const emit = defineEmits(['updatePlayers']);
-// const playersRound: Ref<Player[]> = ref(props.players);
-const playersRound = computed(() => {
-  const players = props.players;
-  for (let i = 0; i < players.length; i++) {
-    players[i].roundPoints = 0;
-  }
-  return players;
-});
+const playersRoundData = computed(() => props.players);
 const enableCounting: Ref<boolean> = ref(false);
 // const enableCounting: Ref<boolean> = ref(true);
 
@@ -34,9 +27,9 @@ function updateRoundPoints({
 }
 
 function updatePlayersPoints() {
-  for (let i = 0; i < playersRound.value.length; i++) {
-    playersRound.value[i].points = playersRound.value[i].roundPoints ?? 0;
-    playersRound.value[i].roundPoints = 0;
+  for (let player of playersRoundData.value) {
+    player.points = player.roundPoints ? player.roundPoints : player.points;
+    player.roundPoints = 0;
   }
 }
 
@@ -44,7 +37,7 @@ function closeRound() {
   console.log('Round finished!');
   if (confirm("Es-tu sûr d'avoir fini le tour x ?") == true) {
     updatePlayersPoints();
-    emit('updatePlayers', playersRound.value as Player[]);
+    emit('updatePlayers', playersRoundData.value as Player[]);
     enableCounting.value = false;
   }
 }
@@ -68,8 +61,8 @@ function closeRound() {
         <th>Noms</th>
         <th>Points</th>
       </tr>
-      <template v-if="playersRound.length > 0">
-        <tr v-for="player in playersRound" :key="player.id">
+      <template v-if="playersRoundData.length > 0">
+        <tr v-for="player in playersRoundData" :key="player.id">
           <td>{{ player.name }}</td>
           <td class="row-points">
             <span>{{ player.points }}</span>
@@ -83,7 +76,7 @@ function closeRound() {
                 @input="updateRoundPoints({ player, roundPoints: $event?.target?.valueAsNumber })"
               />
               =
-              <span>{{ player.roundPoints ?? 0 }}</span>
+              <span>{{ player.roundPoints }}</span>
             </div>
           </td>
         </tr>

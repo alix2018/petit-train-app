@@ -26,13 +26,6 @@ const storageData = computed(() => {
   };
 });
 
-onMounted(() => {
-  if (storageData.value.playersArray.length > 0) {
-    players.value = storageData.value.playersArray;
-  }
-  gameStarted.value = storageData.value.gameStarted;
-});
-
 watch(gameStarted, (newValue) => {
   localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
 });
@@ -46,7 +39,7 @@ watch(
 );
 
 function addPlayer(newPlayerName: PlayerName) {
-  players.value.push({ id: idCount.value, name: newPlayerName, points: 0 });
+  players.value.push({ id: idCount.value, name: newPlayerName, points: 0, roundPoints: 0 });
   idCount.value++;
 }
 
@@ -57,6 +50,13 @@ function updatePlayersPoints(updatedPlayers: Player[]) {
 function startGame() {
   gameStarted.value = true;
 }
+
+onMounted(() => {
+  if (storageData.value.playersArray.length > 0) {
+    players.value = storageData.value.playersArray;
+  }
+  gameStarted.value = storageData.value.gameStarted;
+});
 </script>
 
 <template>
