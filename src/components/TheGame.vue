@@ -3,10 +3,11 @@ import { computed, onMounted } from 'vue';
 import ManagePlayers from './ManagePlayers.vue';
 import ManagePoints from './ManagePoints.vue';
 import ResetButtons from './ResetButtons.vue';
-import { usePlayersStore } from '@/stores/players';
+import { useGameStore, usePlayersStore } from '@/stores';
 import { LOCAL_STORAGE_PLAYERS_ARRAY, LOCAL_STORAGE_GAME_STARTED } from '@/constants';
 
-const store = usePlayersStore();
+const gameStore = useGameStore();
+const playersStore = usePlayersStore();
 
 const storageData = computed(() => {
   const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
@@ -20,16 +21,18 @@ const storageData = computed(() => {
 
 onMounted(() => {
   if (storageData.value.playersArray.length > 0) {
-    store.players = storageData.value.playersArray;
+    playersStore.players = storageData.value.playersArray;
   }
-  store.gameStarted = storageData.value.gameStarted;
+  gameStore.gameStarted = storageData.value.gameStarted;
 });
 </script>
 
 <template>
-  <header v-if="!store.gameStarted">
+  <header v-if="!gameStore.gameStarted">
     <ManagePlayers />
-    <button type="button" @click="store.startGame" class="start-game">Commencer la partie</button>
+    <button type="button" @click="gameStore.startGame" class="start-game">
+      Commencer la partie
+    </button>
   </header>
 
   <ManagePoints />

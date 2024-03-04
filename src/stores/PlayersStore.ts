@@ -1,10 +1,11 @@
-import { type Ref, ref, computed, watch } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { LOCAL_STORAGE_PLAYERS_ARRAY, LOCAL_STORAGE_GAME_STARTED } from '@/constants';
+import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import type { Player, Players, PlayerName } from '@/types';
+import { useGameStore } from '@/stores';
 
 export const usePlayersStore = defineStore('players', () => {
-  // PLAYERS
+  const gameStore = useGameStore();
   const idCount: Ref<number> = ref(0);
   const players: Ref<Players> = ref([]);
   // TO TEST;
@@ -30,7 +31,7 @@ export const usePlayersStore = defineStore('players', () => {
   function resetPlayers() {
     if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
       players.value = [];
-      gameStarted.value = false;
+      gameStore.gameStarted = false;
       idCount.value = 0;
     }
   }
@@ -39,30 +40,5 @@ export const usePlayersStore = defineStore('players', () => {
     players.value = updatedPlayers;
   }
 
-  // GAME
-  const gameStarted: Ref<boolean> = ref(false);
-  // TO TEST
-  // const gameStarted: Ref<boolean> = ref(true);
-
-  watch(gameStarted, (newValue) => {
-    localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
-  });
-
-  function startGame() {
-    gameStarted.value = true;
-  }
-
-  function resetGame() {
-    if (
-      confirm('Es-tu sûr de vouloir remettre les compteurs à 0 et garder les mêmes joueurs ?') ===
-      true
-    ) {
-      for (const player of players.value) {
-        player.points = 0;
-        player.roundPoints = 0;
-      }
-    }
-  }
-
-  return { players, gameStarted, addPlayer, updatePlayers, resetPlayers, startGame, resetGame };
+  return { players, addPlayer, updatePlayers, resetPlayers };
 });

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue';
 import type { PlayerName } from '@/types';
-import { usePlayersStore } from '@/stores/players';
+import { usePlayersStore } from '@/stores';
 
-const store = usePlayersStore();
+const playersStore = usePlayersStore();
 const playerName: Ref<PlayerName> = ref(null);
 const playerNameInput: Ref<HTMLInputElement | null> = ref(null);
 
@@ -15,7 +15,7 @@ onMounted(() => {
 
 function savePlayer() {
   if (playerName.value) {
-    store.addPlayer(playerName.value);
+    playersStore.addPlayer(playerName.value);
     playerName.value = null;
   }
 }
