@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { type Ref, ref, onMounted } from 'vue';
 import type { PlayerName } from '@/types';
+import { usePlayersStore } from '@/stores';
 
+const playersStore = usePlayersStore();
 const playerName: Ref<PlayerName> = ref(null);
-const playerInput: Ref<HTMLInputElement | null> = ref(null);
-const emit = defineEmits(['submit']);
+const playerNameInput: Ref<HTMLInputElement | null> = ref(null);
 
 onMounted(() => {
-  if (playerInput.value) {
-    playerInput.value.focus();
+  if (playerNameInput.value) {
+    playerNameInput.value.focus();
   }
 });
 
 function savePlayer() {
   if (playerName.value) {
-    emit('submit', playerName.value);
+    playersStore.addPlayer(playerName.value);
     playerName.value = null;
   }
 }
@@ -27,7 +28,7 @@ function savePlayer() {
       <input
         type="text"
         id="player"
-        ref="playerInput"
+        ref="playerNameInput"
         v-model="playerName"
         minlength="1"
         size="10"

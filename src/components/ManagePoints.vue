@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { type Ref, ref, computed } from 'vue';
 import type { Player } from '@/types';
+import { useGameStore, usePlayersStore } from '@/stores';
 
-type Props = {
-  players: Player[];
-  gameStarted: boolean;
-};
-const props = defineProps<Props>();
-const emit = defineEmits(['updatePlayers']);
-const playersRoundData = computed(() => props.players);
+const gameStore = useGameStore();
+const playersStore = usePlayersStore();
+const playersRoundData = computed(() => playersStore.players);
 const enableCounting: Ref<boolean> = ref(false);
+// TO TEST
 // const enableCounting: Ref<boolean> = ref(true);
 
 function countRoundPoints() {
@@ -34,17 +32,16 @@ function updatePlayersPoints() {
 }
 
 function closeRound() {
-  console.log('Round finished!');
-  if (confirm("Es-tu sûr d'avoir fini le tour x ?") == true) {
+  if (confirm("Es-tu sûr d'avoir fini le tour x ?") === true) {
     updatePlayersPoints();
-    emit('updatePlayers', playersRoundData.value as Player[]);
+    playersStore.updatePlayers(playersRoundData.value);
     enableCounting.value = false;
   }
 }
 </script>
 
 <template>
-  <section v-if="gameStarted" class="dominos">
+  <section v-if="gameStore.gameStarted" class="dominos">
     <h1>Domino: 12</h1>
     <button
       v-if="!enableCounting"
