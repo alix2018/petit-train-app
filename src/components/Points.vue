@@ -35,7 +35,7 @@ function updatePlayersPoints() {
 
 function closeRound() {
   console.log('Round finished!');
-  if (confirm("Es-tu sûr d'avoir fini le tour x ?") == true) {
+  if (confirm("Es-tu sûr d'avoir fini le tour x ?") === true) {
     updatePlayersPoints();
     emit('updatePlayers', playersRoundData.value as Player[]);
     enableCounting.value = false;

@@ -43,12 +43,32 @@ function addPlayer(newPlayerName: PlayerName) {
   idCount.value++;
 }
 
-function updatePlayersPoints(updatedPlayers: Player[]) {
+function updatePlayers(updatedPlayers: Player[]) {
   players.value = updatedPlayers;
 }
 
 function startGame() {
   gameStarted.value = true;
+}
+
+function resetGame() {
+  if (
+    confirm('Es-tu sûr de vouloir remettre les compteurs à 0 et garder les mêmes joueurs ?') ===
+    true
+  ) {
+    for (let player of players.value) {
+      player.points = 0;
+      player.roundPoints = 0;
+    }
+  }
+}
+
+function resetPlayers() {
+  if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
+    players.value = [];
+    gameStarted.value = false;
+    idCount.value = 0;
+  }
 }
 
 onMounted(() => {
@@ -65,16 +85,13 @@ onMounted(() => {
     <button type="button" @click="startGame" class="start-game">Commencer la partie</button>
   </template>
 
-  <Points
-    @updatePlayersPoints="updatePlayersPoints"
-    :players="players"
-    :gameStarted="gameStarted"
-  />
+  <Points @updatePlayersPoints="updatePlayers" :players="players" :gameStarted="gameStarted" />
   <footer class="footer">
-    <button type="button" onclick="alert('TODO: reset points!')">Reset points</button>
-    <button type="button" onclick="alert('TODO: reset players')">Reset players</button>
-    <button type="button" onclick="alert('TODO: Historique')">Historique</button>
-    <button type="button" onclick="alert('TODO: règles')">Règles</button>
+    <!-- <ResetButtons :players="players" @updatePlayersPoints="updatePlayers" @updateGameStarted></ResetButton> -->
+    <button type="button" @click="resetGame">Recommencer la partie</button>
+    <button type="button" @click="resetPlayers">Changer de joueurs</button>
+    <button type="button" @click="alert('TODO: Historique')">Historique</button>
+    <button type="button" @click="alert('TODO: règles')">Règles</button>
   </footer>
 </template>
 
