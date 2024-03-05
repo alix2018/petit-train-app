@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { type Ref, ref, computed } from 'vue';
+import { computed } from 'vue';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore } from '@/stores';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const playersRoundData = computed(() => playersStore.players);
-const enableCounting: Ref<boolean> = ref(false);
-// TO TEST
-// const enableCounting: Ref<boolean> = ref(true);
 
 function countRoundPoints() {
-  enableCounting.value = true;
+  gameStore.enableCounting = true;
+  for (let player of playersRoundData.value) {
+    player.roundPoints = player.points;
+  }
 }
 
 function updateRoundPoints({
@@ -21,7 +21,7 @@ function updateRoundPoints({
   player: Player;
   roundPoints: number | null;
 }) {
-  player.roundPoints = player.points + (roundPoints ?? 0);
+  player.roundPoints = Number(player.points + (roundPoints || 0));
 }
 
 function updatePlayersPoints() {
@@ -32,19 +32,20 @@ function updatePlayersPoints() {
 }
 
 function closeRound() {
-  if (confirm("Es-tu sûr d'avoir fini le tour x ?") === true) {
+  if (confirm(`Es-tu sûr d'avoir fini le tour ${gameStore.roundCounter} ?`) === true) {
     updatePlayersPoints();
     playersStore.updatePlayers(playersRoundData.value);
-    enableCounting.value = false;
+    gameStore.enableCounting = false;
+    gameStore.roundCounter--;
   }
 }
 </script>
 
 <template>
   <section v-if="gameStore.gameStarted" class="dominos">
-    <h1>Domino: 12</h1>
+    <h1>Domino: {{ gameStore.roundCounter }}</h1>
     <button
-      v-if="!enableCounting"
+      v-if="!gameStore.enableCounting"
       type="button"
       @click="countRoundPoints"
       class="count-round-points"
@@ -63,7 +64,7 @@ function closeRound() {
           <td>{{ player.name }}</td>
           <td class="row-points">
             <span>{{ player.points }}</span>
-            <div v-if="enableCounting">
+            <div v-if="gameStore.enableCounting">
               +
               <input
                 type="number"
@@ -79,7 +80,12 @@ function closeRound() {
         </tr>
       </template>
     </table>
-    <button v-if="enableCounting" class="close-round" type="button" @click="closeRound">
+    <button
+      v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
+      class="close-round"
+      type="button"
+      @click="closeRound"
+    >
       Finir le tour
     </button>
   </section>

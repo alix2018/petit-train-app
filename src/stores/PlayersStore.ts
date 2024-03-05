@@ -17,7 +17,6 @@ export const usePlayersStore = defineStore('players', () => {
   watch(
     () => players,
     (newValue) => {
-      console.log('watch - new value PLAYERS', players);
       localStorage.setItem(LOCAL_STORAGE_PLAYERS_ARRAY, JSON.stringify(newValue.value));
     },
     { deep: true }
@@ -33,6 +32,7 @@ export const usePlayersStore = defineStore('players', () => {
       players.value = [];
       gameStore.gameStarted = false;
       idCount.value = 0;
+      gameStore.enableCounting = false;
     }
   }
 
