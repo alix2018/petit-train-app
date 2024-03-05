@@ -28,6 +28,14 @@ function updatePlayersPoints() {
   for (let player of playersRoundData.value) {
     player.points = player.roundPoints ? player.roundPoints : player.points;
     player.roundPoints = 0;
+    player.tempInputPoints = null;
+  }
+}
+
+function resetRoundPoints() {
+  for (let player of playersRoundData.value) {
+    player.roundPoints = 0;
+    player.tempInputPoints = null;
   }
 }
 
@@ -44,50 +52,75 @@ function closeRound() {
 <template>
   <section v-if="gameStore.gameStarted" class="dominos">
     <h1>Domino: {{ gameStore.roundCounter }}</h1>
-    <button
+    <Button
       v-if="!gameStore.enableCounting"
       type="button"
-      @click="countRoundPoints"
       class="count-round-points"
-    >
-      Compter les points
-    </button>
+      label="Compter les points 🎯"
+      raised
+      @click="countRoundPoints"
+    />
   </section>
   <section>
-    <table>
-      <tr>
-        <th>Noms</th>
-        <th>Points</th>
-      </tr>
-      <template v-if="playersRoundData.length > 0">
-        <tr v-for="player in playersRoundData" :key="player.id">
-          <td>{{ player.name }}</td>
-          <td class="row-points">
+    <DataTable
+      v-if="playersRoundData.length > 0"
+      :value="playersRoundData"
+      size="small"
+      showGridlines
+      removableSort
+      scrollable
+    >
+      <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
+      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting" />
+      <Column
+        field="points"
+        header="Points"
+        key="roundPoints"
+        :sortable="!gameStore.enableCounting"
+      >
+        <template #body="{ data: player }">
+          <section class="row-points">
             <span>{{ player.points }}</span>
-            <div v-if="gameStore.enableCounting">
+            <template v-if="gameStore.enableCounting">
               +
-              <input
-                type="number"
+              <InputNumber
                 :id="player.id.toString()"
+                :min="0"
                 class="input-points"
-                width="5"
-                @input="updateRoundPoints({ player, roundPoints: $event?.target?.valueAsNumber })"
+                v-model="player.tempInputPoints"
+                @input="
+                  updateRoundPoints({
+                    player,
+                    roundPoints: $event?.value
+                  })
+                "
               />
               =
               <span>{{ player.roundPoints }}</span>
-            </div>
-          </td>
-        </tr>
-      </template>
-    </table>
-    <button
+            </template>
+          </section>
+        </template>
+      </Column>
+    </DataTable>
+    <Button
       v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
-      class="close-round"
       type="button"
+      class="back-round"
+      label="Retour"
+      raised
+      @click="
+        gameStore.enableCounting = false;
+        resetRoundPoints();
+      "
+    />
+    <Button
+      v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
+      type="button"
+      class="close-round"
+      label="Finir le tour ✔"
+      raised
       @click="closeRound"
-    >
-      Finir le tour
-    </button>
+    />
   </section>
 </template>
 
@@ -112,7 +145,8 @@ td {
 }
 
 .input-points {
-  width: 50px;
+  /* width: 20px;
+  display: inline; */
 }
 
 .close-round {

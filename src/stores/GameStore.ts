@@ -33,6 +33,7 @@ export const useGameStore = defineStore('game', () => {
       for (const player of playersStore.players) {
         player.points = 0;
         player.roundPoints = 0;
+        roundCounter.value = DEFAULT_ROUND_NUMBER;
         enableCounting.value = false;
       }
     }

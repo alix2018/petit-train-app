@@ -7,12 +7,6 @@ const playersStore = usePlayersStore();
 const playerName: Ref<PlayerName> = ref(null);
 const playerNameInput: Ref<HTMLInputElement | null> = ref(null);
 
-onMounted(() => {
-  if (playerNameInput.value) {
-    playerNameInput.value.focus();
-  }
-});
-
 function savePlayer() {
   if (playerName.value) {
     playersStore.addPlayer(playerName.value);
@@ -25,15 +19,15 @@ function savePlayer() {
   <header>
     <form @submit.prevent="savePlayer">
       <label>Joueurs:</label>
-      <input
+      <InputText
         type="text"
         id="player"
         ref="playerNameInput"
         v-model="playerName"
         minlength="1"
-        size="10"
+        autofocus
       />
-      <button type="submit">Ajouter</button>
+      <Button type="submit" label="Ajouter" raised />
     </form>
   </header>
 </template>

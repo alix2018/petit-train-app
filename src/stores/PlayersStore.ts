@@ -23,16 +23,23 @@ export const usePlayersStore = defineStore('players', () => {
   );
 
   function addPlayer(newPlayerName: PlayerName) {
-    players.value.push({ id: idCount.value, name: newPlayerName, points: 0, roundPoints: 0 });
+    players.value.push({
+      id: idCount.value,
+      name: newPlayerName,
+      points: 0,
+      roundPoints: 0,
+      tempInputPoints: null
+    });
     idCount.value++;
   }
 
   function resetPlayers() {
     if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
       players.value = [];
-      gameStore.gameStarted = false;
       idCount.value = 0;
+      gameStore.gameStarted = false;
       gameStore.enableCounting = false;
+      gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
     }
   }
 
