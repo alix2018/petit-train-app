@@ -1,4 +1,4 @@
-import { type Ref, ref, computed, watch } from 'vue';
+import { type Ref, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { LOCAL_STORAGE_GAME_STARTED, LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
 import { usePlayersStore } from '@/stores';

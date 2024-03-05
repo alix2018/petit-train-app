@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore } from '@/stores';
 
