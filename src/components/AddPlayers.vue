@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Ref, ref, onMounted } from 'vue';
+import { type Ref, ref } from 'vue';
 import type { PlayerName } from '@/types';
 import { usePlayersStore } from '@/stores';
 
@@ -16,20 +16,46 @@ function savePlayer() {
 </script>
 
 <template>
-  <header>
-    <form @submit.prevent="savePlayer">
-      <label>Joueurs:</label>
-      <InputText
-        type="text"
-        id="player"
-        ref="playerNameInput"
-        v-model="playerName"
-        minlength="1"
-        autofocus
-      />
-      <Button type="submit" label="Ajouter" raised />
-    </form>
-  </header>
+  <form @submit.prevent="savePlayer">
+    <InputText
+      type="text"
+      id="player"
+      ref="playerNameInput"
+      placeholder="Nom du joueur"
+      v-model="playerName"
+      minlength="1"
+      autofocus
+      autocomplete="off"
+    />
+    <Button type="submit" label="Ajouter" severity="contrast" raised />
+  </form>
 </template>
 
-<style scoped></style>
+<style scoped>
+section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 70%;
+  margin-top: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+}
+
+form > * {
+  width: 100%;
+}
+
+label {
+  text-align: center;
+}
+</style>

@@ -1,11 +1,28 @@
 @import './base.css';
 
 body {
-  background-color: #1dd1a1;
-  background-image: linear-gradient (#d3d3d3 90%, #1dd1a1 90%);
+  background: rgb(15, 126, 196);
+  background: linear-gradient(
+    180deg,
+    rgba(15, 126, 196, 1) 0%,
+    rgba(45, 151, 212, 1) 0%,
+    rgba(113, 208, 246, 1) 100%
+  );
+  /* background-color: #0f7ec4;
+  background-image: linear-gradient (315deg, #0f7ec4 0%, #71d0f6 74%); */
+}
+
+h1 {
+  font-size: 40px;
+  text-align: center;
+  color: white;
+  font-weight: bold;
 }
 
 #app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0 auto;
   padding: 2rem;
   font-weight: normal;

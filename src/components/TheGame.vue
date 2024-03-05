@@ -42,17 +42,22 @@ onMounted(() => {
 
 <template>
   <header v-if="!gameStore.gameStarted">
+    <h1>Train Mexicain</h1>
     <AddPlayers />
     <!-- TODO: Start game only if there are at least 2 playersp -->
-    <Button
-      type="button"
-      label="Commencer la partie 🚂"
-      @click="gameStore.startGame"
-      class="start-game"
-    />
   </header>
 
   <CountPoints />
+
+  <Button
+    v-if="playersStore.players.length >= 2 && !gameStore.gameStarted"
+    type="button"
+    label="Commencer la partie 🚂"
+    class="start-game"
+    severity="secondary"
+    raised
+    @click="gameStore.startGame"
+  />
 
   <footer class="footer">
     <ResetButtons />
@@ -60,8 +65,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .start-game {
   margin: 20px 0;
+  width: 100%;
 }
 
 .footer {

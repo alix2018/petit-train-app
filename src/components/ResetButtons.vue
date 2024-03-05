@@ -9,14 +9,14 @@ const playersStore = usePlayersStore();
   <Button
     type="button"
     label="Recommencer la partie"
-    severity="secondary"
+    severity="primary"
     @click="gameStore.resetGame"
     raised
   />
   <Button
     type="button"
     label="Changer de joueurs"
-    severity="secondary"
+    severity="primary"
     @click="playersStore.resetPlayers"
     raised
   />
@@ -24,4 +24,8 @@ const playersStore = usePlayersStore();
   <Button label="Règles" severity="secondary" @click="alert('TODO: règles')" /> -->
 </template>
 
-<style scoped></style>
+<style scoped>
+Button {
+  font-size: 12px;
+}
+</style>

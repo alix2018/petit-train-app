@@ -50,18 +50,9 @@ function closeRound() {
 </script>
 
 <template>
-  <section v-if="gameStore.gameStarted" class="dominos">
-    <h1>Domino: {{ gameStore.roundCounter }}</h1>
-    <Button
-      v-if="!gameStore.enableCounting"
-      type="button"
-      class="count-round-points"
-      label="Compter les points 🎯"
-      raised
-      @click="countRoundPoints"
-    />
-  </section>
-  <section>
+  <h1 v-if="gameStore.gameStarted">Domino: {{ gameStore.roundCounter }}</h1>
+
+  <section class="table-section">
     <DataTable
       v-if="playersRoundData.length > 0"
       :value="playersRoundData"
@@ -69,6 +60,7 @@ function closeRound() {
       showGridlines
       removableSort
       scrollable
+      class="data-table"
     >
       <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
       <Column field="name" header="Noms" :sortable="!gameStore.enableCounting" />
@@ -103,31 +95,47 @@ function closeRound() {
       </Column>
     </DataTable>
     <Button
-      v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
+      v-if="gameStore.gameStarted && !gameStore.enableCounting"
       type="button"
-      class="back-round"
-      label="Retour"
+      class="count-round-points"
+      label="Compter les points 🎯"
+      severity="secondary"
       raised
-      @click="
-        gameStore.enableCounting = false;
-        resetRoundPoints();
-      "
+      @click="countRoundPoints"
     />
-    <Button
-      v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
-      type="button"
-      class="close-round"
-      label="Finir le tour ✔"
-      raised
-      @click="closeRound"
-    />
+    <section v-if="gameStore.enableCounting && gameStore.roundCounter > 0" class="close-round">
+      <Button
+        type="button"
+        class="back-round"
+        label="Retour"
+        severity="secondary"
+        raised
+        @click="
+          gameStore.enableCounting = false;
+          resetRoundPoints();
+        "
+      />
+      <Button
+        type="button"
+        label="Finir le tour ✔"
+        severity="success"
+        raised
+        @click="closeRound"
+      />
+    </section>
   </section>
 </template>
 
 <style scoped>
-.dominos {
-  font-size: 30px;
-  text-align: center;
+.table-section {
+  display: flex;
+  flex-direction: column;
+  padding-top: 40px;
+  width: 100%;
+}
+
+.data-table.p-datatable-table {
+  border-radius: 8px;
 }
 
 table {
@@ -144,13 +152,17 @@ td {
   display: flex;
 }
 
-.input-points {
-  /* width: 20px;
-  display: inline; */
+.input-points.p-inputnumber-input {
+  width: 10px !important;
+}
+
+.count-round-points {
+  margin-top: 20px;
 }
 
 .close-round {
-  margin-top: 10px;
-  float: right;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 </style>
