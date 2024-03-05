@@ -83,7 +83,7 @@ function closeRound() {
                 @input="
                   updateRoundPoints({
                     player,
-                    roundPoints: $event?.value
+                    roundPoints: Number($event?.value)
                   })
                 "
               />
