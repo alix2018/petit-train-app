@@ -5,10 +5,12 @@ import { usePlayersStore } from '@/stores';
 
 export const useGameStore = defineStore('game', () => {
   const playersStore = usePlayersStore();
-
   const gameStarted: Ref<boolean> = ref(false);
+  const enableCounting: Ref<boolean> = ref(false);
+  const roundCounter: Ref<number> = ref(12);
   // TO TEST
   // const gameStarted: Ref<boolean> = ref(true);
+  // const enableCounting: Ref<boolean> = ref(true);
 
   watch(gameStarted, (newValue) => {
     localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
@@ -26,9 +28,10 @@ export const useGameStore = defineStore('game', () => {
       for (const player of playersStore.players) {
         player.points = 0;
         player.roundPoints = 0;
+        enableCounting.value = false;
       }
     }
   }
 
-  return { gameStarted, startGame, resetGame };
+  return { gameStarted, enableCounting, startGame, resetGame, roundCounter };
 });

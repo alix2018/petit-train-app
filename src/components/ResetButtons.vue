@@ -8,8 +8,8 @@ const playersStore = usePlayersStore();
 <template>
   <button type="button" @click="gameStore.resetGame">Recommencer la partie</button>
   <button type="button" @click="playersStore.resetPlayers">Changer de joueurs</button>
-  <button type="button" @click="alert('TODO: Historique')">Historique</button>
-  <button type="button" @click="alert('TODO: règles')">Règles</button>
+  <!-- <button type="button" @click="alert('TODO: Historique')">Historique</button>
+  <button type="button" @click="alert('TODO: règles')">Règles</button> -->
 </template>
 
 <style scoped></style>
