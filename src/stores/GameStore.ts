@@ -1,13 +1,14 @@
 import { type Ref, ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { LOCAL_STORAGE_GAME_STARTED } from '@/constants';
+import { LOCAL_STORAGE_GAME_STARTED, LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
 import { usePlayersStore } from '@/stores';
 
 export const useGameStore = defineStore('game', () => {
+  const DEFAULT_ROUND_NUMBER = 12;
   const playersStore = usePlayersStore();
   const gameStarted: Ref<boolean> = ref(false);
   const enableCounting: Ref<boolean> = ref(false);
-  const roundCounter: Ref<number> = ref(12);
+  const roundCounter: Ref<number> = ref(DEFAULT_ROUND_NUMBER);
   // TO TEST
   // const gameStarted: Ref<boolean> = ref(true);
   // const enableCounting: Ref<boolean> = ref(true);
@@ -19,6 +20,10 @@ export const useGameStore = defineStore('game', () => {
   function startGame() {
     gameStarted.value = true;
   }
+
+  watch(roundCounter, (newValue) => {
+    localStorage.setItem(LOCAL_STORAGE_ROUND_COUNTER, newValue.toString());
+  });
 
   function resetGame() {
     if (
@@ -33,5 +38,5 @@ export const useGameStore = defineStore('game', () => {
     }
   }
 
-  return { gameStarted, enableCounting, startGame, resetGame, roundCounter };
+  return { gameStarted, enableCounting, startGame, resetGame, roundCounter, DEFAULT_ROUND_NUMBER };
 });
