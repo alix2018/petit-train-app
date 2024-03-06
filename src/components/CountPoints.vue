@@ -47,6 +47,10 @@ function closeRound() {
     gameStore.roundCounter--;
   }
 }
+
+function deletePlayer(player: Player) {
+  playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
+}
 </script>
 
 <template>
@@ -92,7 +96,13 @@ function closeRound() {
           </section>
         </template>
       </Column>
+      <Column v-if="!gameStore.gameStarted" style="width: 10%">
+        <template #body="slotProps">
+          <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
+        </template>
+      </Column>
     </DataTable>
+
     <Button
       v-if="gameStore.gameStarted && !gameStore.enableCounting"
       type="button"
