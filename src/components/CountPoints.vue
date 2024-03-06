@@ -79,7 +79,12 @@ function closeRound() {
                 type="number"
                 :id="player.id.toString()"
                 class="input-points"
-                @input="updateRoundPoints({ player, roundPoints: $event?.target?.valueAsNumber })"
+                @input="
+                  updateRoundPoints({
+                    player,
+                    roundPoints: ($event?.target as HTMLInputElement)?.valueAsNumber
+                  })
+                "
               />
               =
               <span>{{ player.roundPoints }}</span>
