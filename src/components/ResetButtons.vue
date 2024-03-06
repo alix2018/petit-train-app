@@ -6,10 +6,26 @@ const playersStore = usePlayersStore();
 </script>
 
 <template>
-  <button type="button" @click="gameStore.resetGame">Recommencer la partie</button>
-  <button type="button" @click="playersStore.resetPlayers">Changer de joueurs</button>
-  <!-- <button type="button" @click="alert('TODO: Historique')">Historique</button>
-  <button type="button" @click="alert('TODO: règles')">Règles</button> -->
+  <Button
+    type="button"
+    label="Recommencer la partie"
+    severity="primary"
+    @click="gameStore.resetGame"
+    raised
+  />
+  <Button
+    type="button"
+    label="Changer de joueurs"
+    severity="primary"
+    @click="playersStore.resetPlayers"
+    raised
+  />
+  <!-- <Button label="Historique" severity="secondary" @click="alert('TODO: Historique')" />
+  <Button label="Règles" severity="secondary" @click="alert('TODO: règles')" /> -->
 </template>
 
-<style scoped></style>
+<style scoped>
+Button {
+  font-size: 12px;
+}
+</style>

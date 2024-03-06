@@ -28,6 +28,14 @@ function updatePlayersPoints() {
   for (let player of playersRoundData.value) {
     player.points = player.roundPoints ? player.roundPoints : player.points;
     player.roundPoints = 0;
+    player.tempInputPoints = null;
+  }
+}
+
+function resetRoundPoints() {
+  for (let player of playersRoundData.value) {
+    player.roundPoints = 0;
+    player.tempInputPoints = null;
   }
 }
 
@@ -42,59 +50,91 @@ function closeRound() {
 </script>
 
 <template>
-  <section v-if="gameStore.gameStarted" class="dominos">
-    <h1>Domino: {{ gameStore.roundCounter }}</h1>
-    <button
-      v-if="!gameStore.enableCounting"
-      type="button"
-      @click="countRoundPoints"
-      class="count-round-points"
+  <h1 v-if="gameStore.gameStarted">Tour: Double {{ gameStore.roundCounter }}</h1>
+
+  <section class="table-section">
+    <DataTable
+      v-if="playersRoundData.length > 0"
+      :value="playersRoundData"
+      size="small"
+      showGridlines
+      removableSort
+      scrollable
+      class="data-table"
     >
-      Compter les points
-    </button>
-  </section>
-  <section>
-    <table>
-      <tr>
-        <th>Noms</th>
-        <th>Points</th>
-      </tr>
-      <template v-if="playersRoundData.length > 0">
-        <tr v-for="player in playersRoundData" :key="player.id">
-          <td>{{ player.name }}</td>
-          <td class="row-points">
+      <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
+      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting" />
+      <Column
+        field="points"
+        header="Points"
+        key="roundPoints"
+        :sortable="!gameStore.enableCounting"
+      >
+        <template #body="{ data: player }">
+          <section class="row-points">
             <span>{{ player.points }}</span>
-            <div v-if="gameStore.enableCounting">
+            <template v-if="gameStore.enableCounting">
               +
               <input
                 type="number"
                 :id="player.id.toString()"
                 class="input-points"
-                width="5"
-                @input="updateRoundPoints({ player, roundPoints: $event?.target?.valueAsNumber })"
+                @input="
+                  updateRoundPoints({
+                    player,
+                    roundPoints: ($event?.target as HTMLInputElement)?.valueAsNumber
+                  })
+                "
               />
               =
               <span>{{ player.roundPoints }}</span>
-            </div>
-          </td>
-        </tr>
-      </template>
-    </table>
-    <button
-      v-if="gameStore.enableCounting && gameStore.roundCounter > 0"
-      class="close-round"
+            </template>
+          </section>
+        </template>
+      </Column>
+    </DataTable>
+    <Button
+      v-if="gameStore.gameStarted && !gameStore.enableCounting"
       type="button"
-      @click="closeRound"
-    >
-      Finir le tour
-    </button>
+      class="count-round-points"
+      label="Compter les points 🎯"
+      severity="secondary"
+      raised
+      @click="countRoundPoints"
+    />
+    <section v-if="gameStore.enableCounting && gameStore.roundCounter > 0" class="close-round">
+      <Button
+        type="button"
+        class="back-round"
+        label="Retour"
+        severity="secondary"
+        raised
+        @click="
+          gameStore.enableCounting = false;
+          resetRoundPoints();
+        "
+      />
+      <Button
+        type="button"
+        label="Finir le tour ✔"
+        severity="success"
+        raised
+        @click="closeRound"
+      />
+    </section>
   </section>
 </template>
 
 <style scoped>
-.dominos {
-  font-size: 30px;
-  text-align: center;
+.table-section {
+  display: flex;
+  flex-direction: column;
+  padding-top: 40px;
+  width: 100%;
+}
+
+.data-table.p-datatable-table {
+  border-radius: 8px;
 }
 
 table {
@@ -109,14 +149,27 @@ td {
 
 .row-points {
   display: flex;
+  align-items: center;
 }
 
 .input-points {
-  width: 50px;
+  width: 60px;
+  font-size: 1rem;
+  color: #334155;
+  background: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  appearance: none;
+}
+
+.count-round-points {
+  margin-top: 20px;
 }
 
 .close-round {
-  margin-top: 10px;
-  float: right;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 </style>

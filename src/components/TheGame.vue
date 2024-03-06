@@ -31,6 +31,7 @@ onMounted(() => {
   if (storageData.value.playersArray.length > 0) {
     for (let player of storageData.value.playersArray) {
       player.roundPoints = 0;
+      player.tempInputPoints = null;
     }
     playersStore.players = storageData.value.playersArray;
   }
@@ -41,13 +42,22 @@ onMounted(() => {
 
 <template>
   <header v-if="!gameStore.gameStarted">
+    <h1>Train Mexicain</h1>
     <AddPlayers />
-    <button type="button" @click="gameStore.startGame" class="start-game">
-      Commencer la partie
-    </button>
+    <!-- TODO: Start game only if there are at least 2 playersp -->
   </header>
 
   <CountPoints />
+
+  <Button
+    v-if="playersStore.players.length >= 2 && !gameStore.gameStarted"
+    type="button"
+    label="Commencer la partie 🚂"
+    class="start-game"
+    severity="secondary"
+    raised
+    @click="gameStore.startGame"
+  />
 
   <footer class="footer">
     <ResetButtons />
@@ -55,8 +65,16 @@ onMounted(() => {
 </template>
 
 <style scoped>
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
 .start-game {
   margin: 20px 0;
+  width: 100%;
 }
 
 .footer {
