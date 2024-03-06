@@ -25,6 +25,7 @@ export default defineConfig({
         short_name: 'Train',
         description: 'Application pour le jeu du train Mexicain',
         theme_color: '#0f7ec4',
+        background_color: '#0f7ec4',
         icons: [
           {
             src: '/android-chrome-192x192.png',
