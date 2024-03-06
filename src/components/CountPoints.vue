@@ -48,17 +48,21 @@ function closeRound() {
   }
 }
 
-const rowClass = (data: Player) => {
-  const isWinner =
-    gameStore.roundCounter < 12 &&
-    gameStore.gameStarted &&
-    winners.value.some((winner) => winner.name === data.name);
+const rowClass = (player: Player) => {
   return [
     {
-      'row-highlighted': isWinner
+      'row-highlighted': isWinner(player)
     }
   ];
 };
+
+function isWinner(player: Player) {
+  return (
+    gameStore.roundCounter < 12 &&
+    gameStore.gameStarted &&
+    winners.value.some((winner) => winner.name === player.name)
+  );
+}
 
 const winners = computed(() => {
   const minPoints = playersStore.players.reduce((minValue, currentObject) => {
@@ -68,9 +72,9 @@ const winners = computed(() => {
   return playersStore.players.filter((obj) => obj.points === minPoints);
 });
 
-// function deletePlayer(player: Player) {
-//   playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
-// }
+function deletePlayer(player: Player) {
+  playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
+}
 </script>
 
 <template>
@@ -88,7 +92,11 @@ const winners = computed(() => {
       class="data-table"
     >
       <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
-      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting" />
+      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting">
+        <template #body="{ data: player }">
+          <span v-if="isWinner(player)">🏆</span> {{ player.name }}
+        </template>
+      </Column>
       <Column
         field="points"
         header="Points"
@@ -117,12 +125,11 @@ const winners = computed(() => {
           </section>
         </template>
       </Column>
-      <!-- FIX: Put the idCount in the storage to not have overlaps when refreshing -->
-      <!-- <Column v-if="!gameStore.gameStarted" style="width: 10%">
+      <Column v-if="!gameStore.gameStarted" style="width: 10%">
         <template #body="slotProps">
           <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
         </template>
-      </Column> -->
+      </Column>
     </DataTable>
 
     <Button

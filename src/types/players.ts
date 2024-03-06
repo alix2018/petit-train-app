@@ -1,7 +1,7 @@
 import { type Ref, ref } from 'vue';
 export type Players = Player[];
 export type Player = {
-  id: number;
+  id: string;
   name: PlayerName;
   points: number;
   roundPoints: number;
