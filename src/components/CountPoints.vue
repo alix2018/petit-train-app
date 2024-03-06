@@ -48,9 +48,29 @@ function closeRound() {
   }
 }
 
-function deletePlayer(player: Player) {
-  playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
-}
+const rowClass = (data: Player) => {
+  const isWinner =
+    gameStore.roundCounter < 12 &&
+    gameStore.gameStarted &&
+    winners.value.some((winner) => winner.name === data.name);
+  return [
+    {
+      'row-highlighted': isWinner
+    }
+  ];
+};
+
+const winners = computed(() => {
+  const minPoints = playersStore.players.reduce((minValue, currentObject) => {
+    return currentObject.points < minValue ? currentObject.points : minValue;
+  }, playersStore.players[0].points);
+
+  return playersStore.players.filter((obj) => obj.points === minPoints);
+});
+
+// function deletePlayer(player: Player) {
+//   playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
+// }
 </script>
 
 <template>
@@ -60,6 +80,7 @@ function deletePlayer(player: Player) {
     <DataTable
       v-if="playersRoundData.length > 0"
       :value="playersRoundData"
+      :rowClass="rowClass"
       size="small"
       showGridlines
       removableSort
@@ -96,11 +117,12 @@ function deletePlayer(player: Player) {
           </section>
         </template>
       </Column>
-      <Column v-if="!gameStore.gameStarted" style="width: 10%">
+      <!-- FIX: Put the idCount in the storage to not have overlaps when refreshing -->
+      <!-- <Column v-if="!gameStore.gameStarted" style="width: 10%">
         <template #body="slotProps">
           <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
         </template>
-      </Column>
+      </Column> -->
     </DataTable>
 
     <Button
@@ -175,6 +197,10 @@ td {
 
 .count-round-points {
   margin-top: 20px;
+}
+
+:deep(.row-highlighted) {
+  background-color: #ffdc73;
 }
 
 .close-round {
