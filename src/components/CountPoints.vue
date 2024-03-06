@@ -50,7 +50,7 @@ function closeRound() {
 </script>
 
 <template>
-  <h1 v-if="gameStore.gameStarted">Domino: {{ gameStore.roundCounter }}</h1>
+  <h1 v-if="gameStore.gameStarted">Tour: Double {{ gameStore.roundCounter }}</h1>
 
   <section class="table-section">
     <DataTable
@@ -75,17 +75,11 @@ function closeRound() {
             <span>{{ player.points }}</span>
             <template v-if="gameStore.enableCounting">
               +
-              <InputNumber
+              <input
+                type="number"
                 :id="player.id.toString()"
-                :min="0"
                 class="input-points"
-                v-model="player.tempInputPoints"
-                @input="
-                  updateRoundPoints({
-                    player,
-                    roundPoints: Number($event?.value)
-                  })
-                "
+                @input="updateRoundPoints({ player, roundPoints: $event?.target?.valueAsNumber })"
               />
               =
               <span>{{ player.roundPoints }}</span>
@@ -150,10 +144,18 @@ td {
 
 .row-points {
   display: flex;
+  align-items: center;
 }
 
-.input-points.p-inputnumber-input {
-  width: 10px !important;
+.input-points {
+  width: 60px;
+  font-size: 1rem;
+  color: #334155;
+  background: #ffffff;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  appearance: none;
 }
 
 .count-round-points {
