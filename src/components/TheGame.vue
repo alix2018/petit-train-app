@@ -44,7 +44,6 @@ onMounted(() => {
   <header v-if="!gameStore.gameStarted">
     <h1>Train Mexicain</h1>
     <AddPlayers />
-    <!-- TODO: Start game only if there are at least 2 playersp -->
   </header>
 
   <CountPoints />
