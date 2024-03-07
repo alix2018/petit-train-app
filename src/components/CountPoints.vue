@@ -6,6 +6,7 @@ import { useGameStore, usePlayersStore } from '@/stores';
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const playersRoundData = computed(() => playersStore.players);
+const isResultsPage = computed(() => gameStore.roundCounter === -1);
 
 function countRoundPoints() {
   gameStore.enableCounting = true;
@@ -58,7 +59,7 @@ const rowClass = (player: Player) => {
 
 function isWinner(player: Player) {
   return (
-    gameStore.roundCounter < 12 &&
+    gameStore.roundCounter < gameStore.DEFAULT_ROUND_NUMBER &&
     gameStore.gameStarted &&
     winners.value.some((winner) => winner.name === player.name)
   );
@@ -78,7 +79,10 @@ function deletePlayer(player: Player) {
 </script>
 
 <template>
-  <h1 v-if="gameStore.gameStarted">Tour: Double {{ gameStore.roundCounter }}</h1>
+  <template v-if="gameStore.gameStarted">
+    <h1 v-if="!isResultsPage">Tour : Double {{ gameStore.roundCounter }}</h1>
+    <h1 v-else>🎉 Résultats 🎉</h1>
+  </template>
 
   <section class="table-section">
     <DataTable
@@ -133,7 +137,7 @@ function deletePlayer(player: Player) {
     </DataTable>
 
     <Button
-      v-if="gameStore.gameStarted && !gameStore.enableCounting"
+      v-if="gameStore.gameStarted && !gameStore.enableCounting && !isResultsPage"
       type="button"
       class="count-round-points"
       label="Compter les points 🎯"
@@ -141,7 +145,7 @@ function deletePlayer(player: Player) {
       raised
       @click="countRoundPoints"
     />
-    <section v-if="gameStore.enableCounting && gameStore.roundCounter > 0" class="close-round">
+    <section v-if="gameStore.enableCounting && gameStore.roundCounter >= 0" class="close-round">
       <Button
         type="button"
         class="back-round"
@@ -154,9 +158,18 @@ function deletePlayer(player: Player) {
         "
       />
       <Button
+        v-if="gameStore.roundCounter > 0"
         type="button"
         label="Finir le tour ✔"
         severity="success"
+        raised
+        @click="closeRound"
+      />
+      <Button
+        v-if="gameStore.roundCounter === 0"
+        type="button"
+        label="Finir la partie 🏁"
+        severity="contrast"
         raised
         @click="closeRound"
       />
