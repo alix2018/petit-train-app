@@ -50,7 +50,9 @@ function closeRound() {
 </script>
 
 <template>
-  <h1 v-if="gameStore.gameStarted">Tour: Double {{ gameStore.roundCounter }}</h1>
+  <template v-if="gameStore.gameStarted">
+    <img :src="`/src/assets/double${gameStore.roundCounter}.png`" height="70px" />
+  </template>
 
   <section class="table-section">
     <DataTable
