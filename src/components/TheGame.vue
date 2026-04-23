@@ -17,6 +17,7 @@ const storageData = computed(() => {
   const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
   const gameStartedStorageValue = localStorage.getItem(LOCAL_STORAGE_GAME_STARTED);
   const roundCounterStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER);
+  // TODO: Add history storage value
 
   return {
     playersArray: playersArrayStorageValue ? JSON.parse(playersArrayStorageValue) : [],
@@ -83,4 +84,3 @@ header {
   gap: 5px;
 }
 </style>
-./CountPoints.vue
