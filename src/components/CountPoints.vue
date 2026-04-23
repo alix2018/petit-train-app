@@ -80,7 +80,11 @@ function deletePlayer(player: Player) {
 
 <template>
   <template v-if="gameStore.gameStarted">
-    <h1 v-if="!isResultsPage">Tour : Double {{ gameStore.roundCounter }}</h1>
+    <img
+      v-if="!isResultsPage"
+      :src="`/src/assets/double${gameStore.roundCounter}.png`"
+      height="70px"
+    />
     <h1 v-else>🎉 Résultats 🎉</h1>
   </template>
 
