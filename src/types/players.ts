@@ -1,4 +1,3 @@
-import { type Ref, ref } from 'vue';
 export type Players = Player[];
 export type Player = {
   id: string;

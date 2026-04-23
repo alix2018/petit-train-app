@@ -5,7 +5,6 @@ import { usePlayersStore } from '@/stores';
 
 const playersStore = usePlayersStore();
 const playerName: Ref<PlayerName> = ref(null);
-const playerNameInput: Ref<HTMLInputElement | null> = ref(null);
 
 function savePlayer() {
   if (playerName.value) {
@@ -20,7 +19,6 @@ function savePlayer() {
     <InputText
       type="text"
       id="player"
-      ref="playerNameInput"
       placeholder="Nom du joueur"
       v-model="playerName"
       minlength="1"
