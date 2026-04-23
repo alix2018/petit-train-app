@@ -6,6 +6,7 @@ import { useGameStore, usePlayersStore } from '@/stores';
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const playersRoundData = computed(() => playersStore.players);
+const isResultsPage = computed(() => gameStore.roundCounter === -1);
 
 function countRoundPoints() {
   gameStore.enableCounting = true;
@@ -47,17 +48,51 @@ function closeRound() {
     gameStore.roundCounter--;
   }
 }
+
+const rowClass = (player: Player) => {
+  return [
+    {
+      'row-highlighted': isWinner(player)
+    }
+  ];
+};
+
+function isWinner(player: Player) {
+  return (
+    gameStore.roundCounter < gameStore.DEFAULT_ROUND_NUMBER &&
+    gameStore.gameStarted &&
+    winners.value.some((winner) => winner.name === player.name)
+  );
+}
+
+const winners = computed(() => {
+  const minPoints = playersStore.players.reduce((minValue, currentObject) => {
+    return currentObject.points < minValue ? currentObject.points : minValue;
+  }, playersStore.players[0].points);
+
+  return playersStore.players.filter((obj) => obj.points === minPoints);
+});
+
+function deletePlayer(player: Player) {
+  playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
+}
 </script>
 
 <template>
   <template v-if="gameStore.gameStarted">
-    <img :src="`/src/assets/double${gameStore.roundCounter}.png`" height="70px" />
+    <img
+      v-if="!isResultsPage"
+      :src="`/src/assets/double${gameStore.roundCounter}.png`"
+      height="70px"
+    />
+    <h1 v-else>🎉 Résultats 🎉</h1>
   </template>
 
   <section class="table-section">
     <DataTable
       v-if="playersRoundData.length > 0"
       :value="playersRoundData"
+      :rowClass="rowClass"
       size="small"
       showGridlines
       removableSort
@@ -65,7 +100,11 @@ function closeRound() {
       class="data-table"
     >
       <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
-      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting" />
+      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting">
+        <template #body="{ data: player }">
+          <span v-if="isWinner(player)">🏆</span> {{ player.name }}
+        </template>
+      </Column>
       <Column
         field="points"
         header="Points"
@@ -94,9 +133,15 @@ function closeRound() {
           </section>
         </template>
       </Column>
+      <Column v-if="!gameStore.gameStarted" style="width: 10%">
+        <template #body="slotProps">
+          <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
+        </template>
+      </Column>
     </DataTable>
+
     <Button
-      v-if="gameStore.gameStarted && !gameStore.enableCounting"
+      v-if="gameStore.gameStarted && !gameStore.enableCounting && !isResultsPage"
       type="button"
       class="count-round-points"
       label="Compter les points 🎯"
@@ -104,7 +149,7 @@ function closeRound() {
       raised
       @click="countRoundPoints"
     />
-    <section v-if="gameStore.enableCounting && gameStore.roundCounter > 0" class="close-round">
+    <section v-if="gameStore.enableCounting && gameStore.roundCounter >= 0" class="close-round">
       <Button
         type="button"
         class="back-round"
@@ -117,9 +162,18 @@ function closeRound() {
         "
       />
       <Button
+        v-if="gameStore.roundCounter > 0"
         type="button"
         label="Finir le tour ✔"
         severity="success"
+        raised
+        @click="closeRound"
+      />
+      <Button
+        v-if="gameStore.roundCounter === 0"
+        type="button"
+        label="Finir la partie 🏁"
+        severity="contrast"
         raised
         @click="closeRound"
       />
@@ -167,6 +221,10 @@ td {
 
 .count-round-points {
   margin-top: 20px;
+}
+
+:deep(.row-highlighted) {
+  background-color: #ffdc73;
 }
 
 .close-round {

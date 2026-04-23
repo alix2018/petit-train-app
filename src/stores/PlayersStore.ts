@@ -6,7 +6,6 @@ import { useGameStore } from '@/stores';
 
 export const usePlayersStore = defineStore('players', () => {
   const gameStore = useGameStore();
-  const idCount: Ref<number> = ref(0);
   const players: Ref<Players> = ref([]);
   // TO TEST;
   // const players: Ref<Players> = ref([
@@ -24,19 +23,17 @@ export const usePlayersStore = defineStore('players', () => {
 
   function addPlayer(newPlayerName: PlayerName) {
     players.value.push({
-      id: idCount.value,
+      id: crypto.randomUUID(),
       name: newPlayerName,
       points: 0,
       roundPoints: 0,
       tempInputPoints: null
     });
-    idCount.value++;
   }
 
   function resetPlayers() {
     if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
       players.value = [];
-      idCount.value = 0;
       gameStore.gameStarted = false;
       gameStore.enableCounting = false;
       gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
