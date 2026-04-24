@@ -7,11 +7,6 @@ import { useGameStore } from '@/stores';
 export const usePlayersStore = defineStore('players', () => {
   const gameStore = useGameStore();
   const players: Ref<Players> = ref([]);
-  // TO TEST;
-  // const players: Ref<Players> = ref([
-  //   { id: 1, name: 'Steph', points: 0 },
-  //   { id: 2, name: 'Nico', points: 0 }
-  // ]);
 
   watch(
     () => players,
@@ -37,6 +32,7 @@ export const usePlayersStore = defineStore('players', () => {
       gameStore.gameStarted = false;
       gameStore.enableCounting = false;
       gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
+      gameStore.roundsHistory = [];
     }
   }
 

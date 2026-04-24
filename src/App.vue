@@ -1,9 +1,7 @@
-<script setup lang="ts">
-import TheGame from './components/TheGame.vue';
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <TheGame />
+  <router-view />
 </template>
 
 <style scoped></style>

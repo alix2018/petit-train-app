@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { useGameStore, usePlayersStore } from '@/stores';
+import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
+
+const router = useRouter();
 </script>
 
 <template>
   <section class="buttons-wrapper">
-    <Button label="Historique" severity="secondary" />
+    <Button label="Historique" severity="secondary" @click="router.push({ name: 'history' })" />
     <div class="reset-buttons">
       <Button
         type="button"

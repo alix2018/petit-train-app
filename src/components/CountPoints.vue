@@ -23,6 +23,7 @@ function updateRoundPoints({
   roundPoints: number | null;
 }) {
   player.roundPoints = Number(player.points + (roundPoints || 0));
+  player.tempInputPoints = roundPoints;
 }
 
 function updatePlayersPoints() {
@@ -42,6 +43,10 @@ function resetRoundPoints() {
 
 function closeRound() {
   if (confirm(`Es-tu sûr d'avoir fini le tour ${gameStore.roundCounter} ?`) === true) {
+    gameStore.saveRoundHistory({
+      roundNumber: gameStore.roundCounter,
+      players: playersStore.players
+    });
     updatePlayersPoints();
     playersStore.updatePlayers(playersRoundData.value);
     gameStore.enableCounting = false;
@@ -99,7 +104,6 @@ function deletePlayer(player: Player) {
       scrollable
       class="data-table"
     >
-      <!-- TODO: Highlight user with best score - https://primevue.org/datatable/#conditional_style -->
       <Column field="name" header="Noms" :sortable="!gameStore.enableCounting">
         <template #body="{ data: player }">
           <span v-if="isWinner(player)">🏆</span> {{ player.name }}
