@@ -9,7 +9,7 @@ const router = useRouter();
 </script>
 
 <template>
-  <section class="buttons-wrapper">
+  <section v-if="gameStore.gameStarted" class="buttons-wrapper">
     <Button label="Historique" severity="secondary" @click="router.push({ name: 'history' })" />
     <div class="reset-buttons">
       <Button

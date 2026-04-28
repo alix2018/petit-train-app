@@ -1,6 +1,10 @@
 import { type Ref, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
-import { LOCAL_STORAGE_GAME_STARTED, LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
+import {
+  LOCAL_STORAGE_GAME_STARTED,
+  LOCAL_STORAGE_ROUND_COUNTER,
+  LOCAL_STORAGE_ROUNDS_HISTORY
+} from '@/constants';
 import type { Players } from '@/types';
 import { usePlayersStore } from '@/stores';
 
@@ -16,11 +20,22 @@ export const useGameStore = defineStore('game', () => {
     localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
   });
 
+  watch(roundCounter, (newValue) => {
+    localStorage.setItem(LOCAL_STORAGE_ROUND_COUNTER, newValue.toString());
+  });
+
+  watch(
+    roundsHistory,
+    (newValue) => {
+      localStorage.setItem(LOCAL_STORAGE_ROUNDS_HISTORY, JSON.stringify(newValue));
+    },
+    { deep: true }
+  );
+
   function saveRoundHistory({ roundNumber, players }: { roundNumber: number; players: Players }) {
     const scores: Record<string, number> = {};
 
     players.forEach((player) => {
-      console.log('player', player);
       scores[player.id] = player.tempInputPoints ?? 0;
     });
 
@@ -39,10 +54,6 @@ export const useGameStore = defineStore('game', () => {
   function startGame() {
     gameStarted.value = true;
   }
-
-  watch(roundCounter, (newValue) => {
-    localStorage.setItem(LOCAL_STORAGE_ROUND_COUNTER, newValue.toString());
-  });
 
   function resetGame() {
     if (

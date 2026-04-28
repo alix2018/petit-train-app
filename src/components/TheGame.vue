@@ -7,7 +7,8 @@ import { useGameStore, usePlayersStore } from '@/stores';
 import {
   LOCAL_STORAGE_PLAYERS_ARRAY,
   LOCAL_STORAGE_GAME_STARTED,
-  LOCAL_STORAGE_ROUND_COUNTER
+  LOCAL_STORAGE_ROUND_COUNTER,
+  LOCAL_STORAGE_ROUNDS_HISTORY
 } from '@/constants';
 
 const gameStore = useGameStore();
@@ -17,14 +18,15 @@ const storageData = computed(() => {
   const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
   const gameStartedStorageValue = localStorage.getItem(LOCAL_STORAGE_GAME_STARTED);
   const roundCounterStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER);
-  // TODO: Add history storage value
+  const roundsHistoryStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUNDS_HISTORY);
 
   return {
     playersArray: playersArrayStorageValue ? JSON.parse(playersArrayStorageValue) : [],
     gameStarted: gameStartedStorageValue ? JSON.parse(gameStartedStorageValue) : false,
     roundCounter: roundCounterStorageValue
       ? JSON.parse(roundCounterStorageValue)
-      : gameStore.DEFAULT_ROUND_NUMBER
+      : gameStore.DEFAULT_ROUND_NUMBER,
+    roundsHistory: roundsHistoryStorageValue ? JSON.parse(roundsHistoryStorageValue) : []
   };
 });
 
@@ -38,6 +40,7 @@ onMounted(() => {
   }
   gameStore.gameStarted = storageData.value.gameStarted;
   gameStore.roundCounter = storageData.value.roundCounter;
+  gameStore.roundsHistory = storageData.value.roundsHistory;
 });
 </script>
 

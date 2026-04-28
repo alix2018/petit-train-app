@@ -15,17 +15,17 @@ const gameStore = useGameStore();
     showGridlines
     size="small"
   >
-    <Column field="tour" header="Tour">
+    <Column field="tour">
+      <template #header>
+        <span style="font-weight: bold">Tour</span>
+      </template>
+
       <template #body="{ data }">
-        {{ data.round }}
+        <span style="font-weight: bold">{{ data.round }}</span>
       </template>
     </Column>
 
-    <Column
-      v-for="player in playersStore.players"
-      :key="player.id"
-      :header="String(player.name).slice(0, 3)"
-    >
+    <Column v-for="player in playersStore.players" :key="player.id" :header="String(player.name)">
       <template #body="{ data }">
         {{ data.scores[player.id] ?? 0 }}
       </template>
