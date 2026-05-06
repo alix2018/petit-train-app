@@ -170,7 +170,7 @@ function deletePlayer(player: Player) {
         v-if="gameStore.isUpdatingRound"
         type="button"
         class="back-round"
-        label="← Retour au tour actuel"
+        :label="`← Retour au tour actuel (tour ${gameStore.roundCounter})`"
         severity="secondary"
         raised
         @click="$router.push(`${gameStore.roundCounter}`)"
@@ -188,18 +188,18 @@ function deletePlayer(player: Player) {
         "
       />
       <Button
-        v-if="gameStore.roundCounter > 0"
+        v-if="gameStore.roundCounter === 0 && !gameStore.isUpdatingRound"
         type="button"
-        :label="gameStore.isUpdatingRound ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
-        severity="success"
+        label="Finir la partie 🏁"
+        severity="contrast"
         raised
         @click="closeRound"
       />
       <Button
-        v-if="gameStore.roundCounter === 0"
+        v-else
         type="button"
-        label="Finir la partie 🏁"
-        severity="contrast"
+        :label="gameStore.isUpdatingRound ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
+        severity="success"
         raised
         @click="closeRound"
       />

@@ -7,6 +7,10 @@ import { useGameStore, usePlayersStore } from '@/stores';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
+
+onMounted(() => {
+  gameStore.initGame();
+});
 </script>
 
 <template>

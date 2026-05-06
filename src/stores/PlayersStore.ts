@@ -1,12 +1,16 @@
 import { type Ref, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
+import { ROUTE_NAMES } from '@/router';
+import { useRouter } from 'vue-router';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import type { Player, Players, PlayerName } from '@/types';
 import { useGameStore } from '@/stores';
 
 export const usePlayersStore = defineStore('players', () => {
-  const gameStore = useGameStore();
   const players: Ref<Players> = ref([]);
+
+  const gameStore = useGameStore();
+  const router = useRouter();
 
   watch(
     () => players,
@@ -33,6 +37,7 @@ export const usePlayersStore = defineStore('players', () => {
       gameStore.enableCounting = false;
       gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
       gameStore.roundsHistory = [];
+      router.push({ name: ROUTE_NAMES.GAME });
     }
   }
 

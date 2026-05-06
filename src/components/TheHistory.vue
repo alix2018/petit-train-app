@@ -7,7 +7,10 @@ const playersStore = usePlayersStore();
 const gameStore = useGameStore();
 const router = useRouter();
 
+const isResultsPage = computed(() => gameStore.roundCounter === -1);
+
 function onEditHistory(selectedRound) {
+  gameStore.hydrateRound(selectedRound);
   router.push(`/${selectedRound}`);
 }
 
@@ -47,7 +50,12 @@ const roundsTotalScore = computed(() => {
       <template #body="{ data }">
         <div class="round-column">
           <p>{{ data.round }}</p>
-          <img src="/src/assets/edit.svg" height="16px" @click="onEditHistory(data.round)" />
+          <img
+            v-if="!isResultsPage"
+            src="/src/assets/edit.svg"
+            height="16px"
+            @click="onEditHistory(data.round)"
+          />
         </div>
       </template>
 

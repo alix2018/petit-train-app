@@ -1,5 +1,6 @@
-import { type Ref, ref, watch, computed, onMounted } from 'vue';
+import { type Ref, ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia';
+import { ROUTE_NAMES } from '@/router';
 import {
   LOCAL_STORAGE_PLAYERS_ARRAY,
   LOCAL_STORAGE_GAME_STARTED,
@@ -40,24 +41,33 @@ export const useGameStore = defineStore('game', () => {
     };
   });
 
-  onMounted(() => {
+  let initialized = false;
+
+  function initGame() {
+    if (initialized) {
+      return;
+    }
+    initialized = true;
+
     if (storageData.value.playersArray.length > 0) {
-      for (let player of storageData.value.playersArray) {
+      for (const player of storageData.value.playersArray) {
         player.roundScore = 0;
         player.roundPoints = null;
       }
+
       playersStore.players = storageData.value.playersArray;
     }
+
     gameStarted.value = storageData.value.gameStarted;
     roundCounter.value = storageData.value.roundCounter;
     roundsHistory.value = storageData.value.roundsHistory;
 
     const paramsId = route.params.id ? Number(route.params.id) : null;
     currentRound.value = paramsId ?? roundCounter.value;
-  });
+  }
 
   const isUpdatingRound = computed(() => {
-    return currentRound.value && currentRound.value !== roundCounter.value;
+    return currentRound.value !== null && currentRound.value !== roundCounter.value;
   });
 
   watch(isUpdatingRound, (newValue) => {
@@ -101,10 +111,12 @@ export const useGameStore = defineStore('game', () => {
   watch(
     () => route.params.id,
     (newValue) => {
-      if (newValue) {
-        currentRound.value = Number(newValue);
-        router.push(`/${newValue}`);
-      }
+      currentRound.value = newValue ? Number(newValue) : roundCounter.value;
+
+      hydrateRound(currentRound.value);
+    },
+    {
+      immediate: true
     }
   );
 
@@ -166,8 +178,23 @@ export const useGameStore = defineStore('game', () => {
         roundCounter.value = DEFAULT_ROUND_NUMBER;
         enableCounting.value = false;
         roundsHistory.value = [];
+        router.push({ name: ROUTE_NAMES.GAME });
       }
     }
+  }
+
+  function hydrateRound(round: number) {
+    const history = roundsHistory.value.find((r) => r.round === round);
+
+    if (!history) {
+      return;
+    }
+
+    playersStore.players.forEach((player) => {
+      player.roundPoints = history.roundPoints[player.id] ?? null;
+      player.previousScore = history.previousScore[player.id] ?? 0;
+      player.roundScore = player.previousScore + (player.roundPoints ?? 0);
+    });
   }
 
   return {
@@ -176,6 +203,8 @@ export const useGameStore = defineStore('game', () => {
     currentRound,
     roundsHistory,
     isUpdatingRound,
+    initGame,
+    hydrateRound,
     saveRoundHistory,
     startGame,
     resetGame,
