@@ -2,55 +2,62 @@
 import { computed } from 'vue';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore } from '@/stores';
+import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
+const router = useRouter();
 const playersRoundData = computed(() => playersStore.players);
 const isResultsPage = computed(() => gameStore.roundCounter === -1);
 
-function countRoundPoints() {
+function countRoundScore() {
   gameStore.enableCounting = true;
   for (let player of playersRoundData.value) {
-    player.roundPoints = player.points;
+    player.roundScore = player.previousScore;
   }
 }
 
-function updateRoundPoints({
-  player,
-  roundPoints
-}: {
-  player: Player;
-  roundPoints: number | null;
-}) {
-  player.roundPoints = Number(player.points + (roundPoints || 0));
-  player.tempInputPoints = roundPoints;
+function handleRoundPointsInput(event: Event, player: Player) {
+  const inputPoints = (event.target as HTMLInputElement).valueAsNumber;
+
+  player.roundPoints = Number.isNaN(inputPoints) ? null : inputPoints;
+  player.roundScore = player.previousScore + (player.roundPoints ?? 0);
 }
 
 function updatePlayersPoints() {
   for (let player of playersRoundData.value) {
-    player.points = player.roundPoints ? player.roundPoints : player.points;
-    player.roundPoints = 0;
-    player.tempInputPoints = null;
+    player.previousScore = player.roundScore ? player.roundScore : player.previousScore;
+    player.roundScore = 0;
+    player.roundPoints = null;
   }
 }
 
 function resetRoundPoints() {
   for (let player of playersRoundData.value) {
-    player.roundPoints = 0;
-    player.tempInputPoints = null;
+    player.roundScore = 0;
+    player.roundPoints = null;
   }
 }
 
 function closeRound() {
-  if (confirm(`Es-tu sûr d'avoir fini le tour ${gameStore.roundCounter} ?`) === true) {
+  const message = gameStore.isUpdatingRound
+    ? `Es-tu sûr de vouloir appliquer les changements pour le tour ${gameStore.currentRound} ?`
+    : `Es-tu sûr d'avoir fini le tour ${gameStore.currentRound} ?`;
+  if (confirm(message) === true) {
     gameStore.saveRoundHistory({
-      roundNumber: gameStore.roundCounter,
+      roundNumber: gameStore.currentRound,
       players: playersStore.players
     });
     updatePlayersPoints();
     playersStore.updatePlayers(playersRoundData.value);
     gameStore.enableCounting = false;
-    gameStore.roundCounter--;
+
+    if (!gameStore.isUpdatingRound) {
+      gameStore.roundCounter--;
+    }
+
+    gameStore.currentRound = gameStore.roundCounter;
+    router.push(`/${gameStore.currentRound}`);
   }
 }
 
@@ -72,10 +79,10 @@ function isWinner(player: Player) {
 
 const winners = computed(() => {
   const minPoints = playersStore.players.reduce((minValue, currentObject) => {
-    return currentObject.points < minValue ? currentObject.points : minValue;
-  }, playersStore.players[0].points);
+    return currentObject.previousScore < minValue ? currentObject.previousScore : minValue;
+  }, playersStore.players[0].previousScore);
 
-  return playersStore.players.filter((obj) => obj.points === minPoints);
+  return playersStore.players.filter((obj) => obj.previousScore === minPoints);
 });
 
 function deletePlayer(player: Player) {
@@ -87,7 +94,7 @@ function deletePlayer(player: Player) {
   <template v-if="gameStore.gameStarted">
     <img
       v-if="!isResultsPage"
-      :src="`/src/assets/double${gameStore.roundCounter}.png`"
+      :src="`/src/assets/double${gameStore.currentRound}.png`"
       height="70px"
     />
     <h1 v-else>🎉 Résultats 🎉</h1>
@@ -110,29 +117,26 @@ function deletePlayer(player: Player) {
         </template>
       </Column>
       <Column
-        field="points"
+        field="previousScore"
         header="Points"
-        key="roundPoints"
+        key="roundScore"
         :sortable="!gameStore.enableCounting"
       >
         <template #body="{ data: player }">
           <section class="row-points">
-            <span>{{ player.points }}</span>
-            <template v-if="gameStore.enableCounting">
+            <span>{{ player.previousScore }}</span>
+
+            <template v-if="gameStore.enableCounting || gameStore.isUpdatingRound">
               +
               <input
                 type="number"
                 :id="player.id.toString()"
+                :value="player.roundPoints ?? ''"
                 class="input-points"
-                @input="
-                  updateRoundPoints({
-                    player,
-                    roundPoints: ($event?.target as HTMLInputElement)?.valueAsNumber
-                  })
-                "
+                @input="handleRoundPointsInput($event, player)"
               />
               =
-              <span>{{ player.roundPoints }}</span>
+              <span>{{ player.roundScore }}</span>
             </template>
           </section>
         </template>
@@ -145,19 +149,37 @@ function deletePlayer(player: Player) {
     </DataTable>
 
     <Button
-      v-if="gameStore.gameStarted && !gameStore.enableCounting && !isResultsPage"
+      v-if="
+        gameStore.gameStarted &&
+        !gameStore.enableCounting &&
+        !isResultsPage &&
+        !gameStore.isUpdatingRound
+      "
       type="button"
-      class="count-round-points"
+      class="count-round-score"
       label="Compter les points 🎯"
       severity="secondary"
       raised
-      @click="countRoundPoints"
+      @click="countRoundScore"
     />
-    <section v-if="gameStore.enableCounting && gameStore.roundCounter >= 0" class="close-round">
+    <section
+      v-if="(gameStore.enableCounting && gameStore.roundCounter >= 0) || gameStore.isUpdatingRound"
+      class="close-round"
+    >
       <Button
+        v-if="gameStore.isUpdatingRound"
         type="button"
         class="back-round"
-        label="Retour"
+        label="← Retour au tour actuel"
+        severity="secondary"
+        raised
+        @click="$router.push(`${gameStore.roundCounter}`)"
+      />
+      <Button
+        v-if="!gameStore.isUpdatingRound"
+        type="button"
+        class="back-round"
+        label="Annuler"
         severity="secondary"
         raised
         @click="
@@ -168,7 +190,7 @@ function deletePlayer(player: Player) {
       <Button
         v-if="gameStore.roundCounter > 0"
         type="button"
-        label="Finir le tour ✔"
+        :label="gameStore.isUpdatingRound ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
         severity="success"
         raised
         @click="closeRound"
@@ -223,7 +245,7 @@ td {
   appearance: none;
 }
 
-.count-round-points {
+.count-round-score {
   margin-top: 20px;
 }
 

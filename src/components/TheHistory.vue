@@ -1,36 +1,72 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { usePlayersStore, useGameStore } from '@/stores';
+import { useRouter } from 'vue-router';
 
 const playersStore = usePlayersStore();
 const gameStore = useGameStore();
+const router = useRouter();
+
+function onEditHistory(selectedRound) {
+  router.push(`/${selectedRound}`);
+}
+
+const roundsTotalScore = computed(() => {
+  const result: Record<string, number> = {};
+
+  playersStore.players.forEach((player) => {
+    result[player.id] = 0;
+  });
+
+  gameStore.roundsHistory.forEach((round) => {
+    for (const playerId in round.roundPoints) {
+      result[playerId] += round.roundPoints[playerId];
+    }
+  });
+
+  return result;
+});
 </script>
 
 <template>
   <img src="/src/assets/back-arrow.svg" class="back-button" @click="$router.back()" />
   <h1 class="title">Historique</h1>
   <DataTable
-    class="historique-table"
+    v-if="gameStore.roundsHistory.length > 0"
     :value="gameStore.roundsHistory"
     stripedRows
     showGridlines
     size="small"
+    class="historique-table"
   >
     <Column field="tour">
       <template #header>
-        <span style="font-weight: bold">Tour</span>
+        <span style="font-weight: bold; width: 48px">Tour</span>
       </template>
 
       <template #body="{ data }">
-        <span style="font-weight: bold">{{ data.round }}</span>
+        <div class="round-column">
+          <p>{{ data.round }}</p>
+          <img src="/src/assets/edit.svg" height="16px" @click="onEditHistory(data.round)" />
+        </div>
+      </template>
+
+      <template #footer>
+        <span style="font-weight: bold">Total</span>
       </template>
     </Column>
 
     <Column v-for="player in playersStore.players" :key="player.id" :header="String(player.name)">
       <template #body="{ data }">
-        {{ data.scores[player.id] ?? 0 }}
+        <span class="players-score">{{ data.roundPoints[player.id] ?? 0 }}</span>
+      </template>
+
+      <template #footer>
+        <span class="footer">{{ roundsTotalScore[player.id] }}</span>
       </template>
     </Column>
   </DataTable>
+  <p v-else>Il n'y a pas encore d'historique</p>
 </template>
 
 <style scoped>
@@ -49,9 +85,35 @@ const gameStore = useGameStore();
 
 .title {
   line-height: normal;
+  margin-bottom: 16px;
 }
 
 .historique-table {
   margin-top: 20px;
+}
+
+.round-column {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.round-column > p,
+.footer {
+  font-weight: bold;
+}
+
+.round-column > img {
+  cursor: pointer;
+}
+
+.players-score,
+.footer {
+  display: block;
+  text-align: right;
+}
+
+:deep(.p-datatable-wrapper > table > tfoot > tr > td) {
+  background-color: #ffdc73;
 }
 </style>

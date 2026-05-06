@@ -1,47 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import AddPlayers from './AddPlayers.vue';
 import CountPoints from './CountPoints.vue';
 import ResetButtons from './ResetButtons.vue';
 import { useGameStore, usePlayersStore } from '@/stores';
-import {
-  LOCAL_STORAGE_PLAYERS_ARRAY,
-  LOCAL_STORAGE_GAME_STARTED,
-  LOCAL_STORAGE_ROUND_COUNTER,
-  LOCAL_STORAGE_ROUNDS_HISTORY
-} from '@/constants';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
-
-const storageData = computed(() => {
-  const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
-  const gameStartedStorageValue = localStorage.getItem(LOCAL_STORAGE_GAME_STARTED);
-  const roundCounterStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER);
-  const roundsHistoryStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUNDS_HISTORY);
-
-  return {
-    playersArray: playersArrayStorageValue ? JSON.parse(playersArrayStorageValue) : [],
-    gameStarted: gameStartedStorageValue ? JSON.parse(gameStartedStorageValue) : false,
-    roundCounter: roundCounterStorageValue
-      ? JSON.parse(roundCounterStorageValue)
-      : gameStore.DEFAULT_ROUND_NUMBER,
-    roundsHistory: roundsHistoryStorageValue ? JSON.parse(roundsHistoryStorageValue) : []
-  };
-});
-
-onMounted(() => {
-  if (storageData.value.playersArray.length > 0) {
-    for (let player of storageData.value.playersArray) {
-      player.roundPoints = 0;
-      player.tempInputPoints = null;
-    }
-    playersStore.players = storageData.value.playersArray;
-  }
-  gameStore.gameStarted = storageData.value.gameStarted;
-  gameStore.roundCounter = storageData.value.roundCounter;
-  gameStore.roundsHistory = storageData.value.roundsHistory;
-});
 </script>
 
 <template>

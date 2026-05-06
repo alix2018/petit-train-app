@@ -2,8 +2,8 @@ export type Players = Player[];
 export type Player = {
   id: string;
   name: PlayerName;
-  points: number;
-  roundPoints: number;
-  tempInputPoints: number | null;
-};
+  previousScore: number;
+  roundScore: number;
+  roundPoints: number | null;
+} | null;
 export type PlayerName = string | null;

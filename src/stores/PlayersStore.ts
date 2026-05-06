@@ -20,9 +20,9 @@ export const usePlayersStore = defineStore('players', () => {
     players.value.push({
       id: crypto.randomUUID(),
       name: newPlayerName,
-      points: 0,
-      roundPoints: 0,
-      tempInputPoints: null
+      previousScore: 0,
+      roundScore: 0,
+      roundPoints: null
     });
   }
 

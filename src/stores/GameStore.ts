@@ -1,20 +1,112 @@
-import { type Ref, ref, watch } from 'vue';
+import { type Ref, ref, watch, computed, onMounted } from 'vue';
 import { defineStore } from 'pinia';
 import {
+  LOCAL_STORAGE_PLAYERS_ARRAY,
   LOCAL_STORAGE_GAME_STARTED,
   LOCAL_STORAGE_ROUND_COUNTER,
   LOCAL_STORAGE_ROUNDS_HISTORY
 } from '@/constants';
 import type { Players } from '@/types';
 import { usePlayersStore } from '@/stores';
+import { useRoute, useRouter } from 'vue-router';
 
 export const useGameStore = defineStore('game', () => {
   const DEFAULT_ROUND_NUMBER = 12;
-  const playersStore = usePlayersStore();
   const gameStarted: Ref<boolean> = ref(false);
-  const enableCounting: Ref<boolean> = ref(false);
+  const currentRound: Ref<number | null> = ref(null);
   const roundCounter: Ref<number> = ref(DEFAULT_ROUND_NUMBER);
-  const roundsHistory = ref<{ round: number; scores: Record<string, number> }[]>([]);
+  const enableCounting: Ref<boolean> = ref(false);
+  const roundsHistory = ref<
+    { round: number; previousScore: Record<string, number>; roundPoints: Record<string, number> }[]
+  >([]);
+
+  const playersStore = usePlayersStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const storageData = computed(() => {
+    const playersArrayStorageValue = localStorage.getItem(LOCAL_STORAGE_PLAYERS_ARRAY);
+    const gameStartedStorageValue = localStorage.getItem(LOCAL_STORAGE_GAME_STARTED);
+    const roundCounterStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER);
+    const roundsHistoryStorageValue = localStorage.getItem(LOCAL_STORAGE_ROUNDS_HISTORY);
+
+    return {
+      playersArray: playersArrayStorageValue ? JSON.parse(playersArrayStorageValue) : [],
+      gameStarted: gameStartedStorageValue ? JSON.parse(gameStartedStorageValue) : false,
+      roundCounter: roundCounterStorageValue
+        ? JSON.parse(roundCounterStorageValue)
+        : DEFAULT_ROUND_NUMBER,
+      roundsHistory: roundsHistoryStorageValue ? JSON.parse(roundsHistoryStorageValue) : []
+    };
+  });
+
+  onMounted(() => {
+    if (storageData.value.playersArray.length > 0) {
+      for (let player of storageData.value.playersArray) {
+        player.roundScore = 0;
+        player.roundPoints = null;
+      }
+      playersStore.players = storageData.value.playersArray;
+    }
+    gameStarted.value = storageData.value.gameStarted;
+    roundCounter.value = storageData.value.roundCounter;
+    roundsHistory.value = storageData.value.roundsHistory;
+
+    const paramsId = route.params.id ? Number(route.params.id) : null;
+    currentRound.value = paramsId ?? roundCounter.value;
+  });
+
+  const isUpdatingRound = computed(() => {
+    return currentRound.value && currentRound.value !== roundCounter.value;
+  });
+
+  watch(isUpdatingRound, (newValue) => {
+    if (newValue) {
+      const currentRoundHistory = roundsHistory.value.find(
+        (history) => history.round === currentRound.value
+      );
+
+      playersStore.players.forEach((player) => {
+        const previousScore = roundsHistory.value.reduce((total, history) => {
+          if (history.round > currentRound.value) {
+            return total + (history.roundPoints[player.id] ?? 0);
+          }
+
+          return total;
+        }, 0);
+
+        const roundPoints = currentRoundHistory?.roundPoints[player.id] ?? 0;
+
+        player.previousScore = previousScore;
+        player.roundPoints = roundPoints;
+        player.roundScore = previousScore + roundPoints;
+      });
+    } else if (currentRound.value === roundCounter.value) {
+      playersStore.players.forEach((player) => {
+        const previousScore = roundsHistory.value.reduce((total, history) => {
+          if (history.round > currentRound.value) {
+            return total + (history.roundPoints[player.id] ?? 0);
+          }
+
+          return total;
+        }, 0);
+
+        player.previousScore = previousScore;
+        player.roundPoints = null;
+        player.roundScore = previousScore;
+      });
+    }
+  });
+
+  watch(
+    () => route.params.id,
+    (newValue) => {
+      if (newValue) {
+        currentRound.value = Number(newValue);
+        router.push(`/${newValue}`);
+      }
+    }
+  );
 
   watch(gameStarted, (newValue) => {
     localStorage.setItem(LOCAL_STORAGE_GAME_STARTED, newValue.toString());
@@ -33,20 +125,27 @@ export const useGameStore = defineStore('game', () => {
   );
 
   function saveRoundHistory({ roundNumber, players }: { roundNumber: number; players: Players }) {
-    const scores: Record<string, number> = {};
+    const previousScore: Record<string, number> = {};
+    const roundPoints: Record<string, number> = {};
 
     players.forEach((player) => {
-      scores[player.id] = player.tempInputPoints ?? 0;
+      previousScore[player.id] = player.previousScore ?? 0;
+    });
+
+    players.forEach((player) => {
+      roundPoints[player.id] = player.roundPoints ?? 0;
     });
 
     const existingRound = roundsHistory.value.find((r) => r.round === roundNumber);
 
     if (existingRound) {
-      existingRound.scores = scores;
+      existingRound.previousScore = previousScore;
+      existingRound.roundPoints = roundPoints;
     } else {
       roundsHistory.value.push({
         round: roundNumber,
-        scores
+        previousScore,
+        roundPoints
       });
     }
   }
@@ -61,8 +160,9 @@ export const useGameStore = defineStore('game', () => {
       true
     ) {
       for (const player of playersStore.players) {
-        player.points = 0;
-        player.roundPoints = 0;
+        player.roundScore = 0;
+        player.previousScore = 0;
+        player.roundPoints = null;
         roundCounter.value = DEFAULT_ROUND_NUMBER;
         enableCounting.value = false;
         roundsHistory.value = [];
@@ -73,7 +173,9 @@ export const useGameStore = defineStore('game', () => {
   return {
     gameStarted,
     enableCounting,
+    currentRound,
     roundsHistory,
+    isUpdatingRound,
     saveRoundHistory,
     startGame,
     resetGame,
