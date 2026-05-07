@@ -7,11 +7,13 @@ import { LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
 export const ROUTE_NAMES = {
   GAME: 'game',
   ROUND: 'round',
+  RESULTS: 'results',
   HISTORY: 'history'
 } as const;
 
 const routes = [
   { path: '/', name: ROUTE_NAMES.GAME, component: TheGame },
+  { path: '/results', name: ROUTE_NAMES.RESULTS, component: TheGame },
   { path: '/:id', name: ROUTE_NAMES.ROUND, component: TheGame },
   { path: '/history', name: ROUTE_NAMES.HISTORY, component: TheHistory }
 ];

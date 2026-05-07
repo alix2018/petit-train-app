@@ -2,15 +2,17 @@
 import { computed } from 'vue';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { ROUTE_NAMES } from '@/router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const sessionStore = useSessionStore();
 const router = useRouter();
+const route = useRoute();
 
 const playersRoundData = computed(() => playersStore.players);
-const isResultsPage = computed(() => sessionStore.roundCounter === -1);
+const isResultsPage = computed(() => route.name === ROUTE_NAMES.RESULTS);
 
 function countRoundScore() {
   sessionStore.enableCounting = true;
@@ -56,8 +58,12 @@ function closeRound() {
       sessionStore.roundCounter--;
     }
 
-    gameStore.currentRound = sessionStore.roundCounter;
-    router.push(`/${gameStore.currentRound}`);
+    if (sessionStore.roundCounter < 0) {
+      router.push({ name: ROUTE_NAMES.RESULTS });
+    } else {
+      gameStore.currentRound = sessionStore.roundCounter;
+      router.push(`/${gameStore.currentRound}`);
+    }
   }
 }
 

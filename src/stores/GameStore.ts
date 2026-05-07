@@ -70,6 +70,15 @@ export const useGameStore = defineStore('game', () => {
     { immediate: true }
   );
 
+  watch(
+    () => sessionStore.gameStarted,
+    (newValue) => {
+      if (!newValue) {
+        currentRound.value = sessionStore.DEFAULT_ROUND_NUMBER;
+      }
+    }
+  );
+
   function hydrateRound(round: number) {
     const history = sessionStore.roundsHistory.find((r) => r.round === round);
     if (!history) return;
@@ -89,8 +98,10 @@ export const useGameStore = defineStore('game', () => {
       player.previousScore = 0;
       player.roundPoints = null;
     }
-    sessionStore.resetRounds();
-    router.push({ name: ROUTE_NAMES.GAME });
+    sessionStore.resetSession();
+    sessionStore.startGame();
+    currentRound.value = sessionStore.roundCounter;
+    router.push(`/${sessionStore.roundCounter}`);
   }
 
   return {

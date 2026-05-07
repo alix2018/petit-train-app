@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { usePlayersStore, useGameStore, useSessionStore } from '@/stores';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
+import { ROUTE_NAMES } from '@/router';
 
 const playersStore = usePlayersStore();
 const gameStore = useGameStore();
 const sessionStore = useSessionStore();
 const router = useRouter();
+const route = useRoute();
 
-const isResultsPage = computed(() => sessionStore.roundCounter === -1);
+const isResultsPage = computed(() => route.name === ROUTE_NAMES.RESULTS);
 
 function onEditHistory(selectedRound: number) {
   gameStore.hydrateRound(selectedRound);
