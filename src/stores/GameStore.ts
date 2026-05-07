@@ -2,8 +2,7 @@ import { type Ref, ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { ROUTE_NAMES } from '@/router';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
-import { useSessionStore } from '@/stores';
-import { usePlayersStore } from '@/stores';
+import { useSessionStore, usePlayersStore } from '@/stores';
 import { useRoute, useRouter } from 'vue-router';
 
 export const useGameStore = defineStore('game', () => {
@@ -26,7 +25,6 @@ export const useGameStore = defineStore('game', () => {
 
     if (storedPlayers.length > 0) {
       for (const player of storedPlayers) {
-        player.roundScore = 0;
         player.roundPoints = null;
       }
       playersStore.players = storedPlayers;
@@ -67,7 +65,6 @@ export const useGameStore = defineStore('game', () => {
 
         player.previousScore = previousScore;
         player.roundPoints = isUpdating ? currentRoundHistory?.roundPoints[player.id] ?? 0 : null;
-        player.roundScore = previousScore + (player.roundPoints ?? 0);
       });
     },
     { immediate: true }
@@ -80,7 +77,6 @@ export const useGameStore = defineStore('game', () => {
     playersStore.players.forEach((player) => {
       player.roundPoints = history.roundPoints[player.id] ?? null;
       player.previousScore = history.previousScore[player.id] ?? 0;
-      player.roundScore = player.previousScore + (player.roundPoints ?? 0);
     });
   }
 
@@ -90,7 +86,6 @@ export const useGameStore = defineStore('game', () => {
 
   function resetGame() {
     for (const player of playersStore.players) {
-      player.roundScore = 0;
       player.previousScore = 0;
       player.roundPoints = null;
     }

@@ -25,9 +25,16 @@ export const usePlayersStore = defineStore('players', () => {
       id: crypto.randomUUID(),
       name: newPlayerName ?? '',
       previousScore: 0,
-      roundScore: 0,
       roundPoints: null
     });
+  }
+
+  function getRoundScore(player: Player): number {
+    return player.previousScore + (player.roundPoints ?? 0);
+  }
+
+  function updatePlayers(updatedPlayers: Player[]) {
+    players.value = updatedPlayers;
   }
 
   function resetPlayers() {
@@ -36,9 +43,5 @@ export const usePlayersStore = defineStore('players', () => {
     router.push({ name: ROUTE_NAMES.GAME });
   }
 
-  function updatePlayers(updatedPlayers: Player[]) {
-    players.value = updatedPlayers;
-  }
-
-  return { players, addPlayer, updatePlayers, resetPlayers };
+  return { players, addPlayer, getRoundScore, updatePlayers, resetPlayers };
 });

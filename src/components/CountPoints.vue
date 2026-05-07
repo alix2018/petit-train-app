@@ -8,42 +8,41 @@ const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const sessionStore = useSessionStore();
 const router = useRouter();
+
 const playersRoundData = computed(() => playersStore.players);
 const isResultsPage = computed(() => sessionStore.roundCounter === -1);
 
 function countRoundScore() {
   sessionStore.enableCounting = true;
-  for (let player of playersRoundData.value) {
-    player.roundScore = player.previousScore;
-  }
 }
 
 function handleRoundPointsInput(event: Event, player: Player) {
   const inputPoints = (event.target as HTMLInputElement).valueAsNumber;
-
   player.roundPoints = Number.isNaN(inputPoints) ? null : inputPoints;
-  player.roundScore = player.previousScore + (player.roundPoints ?? 0);
 }
 
 function updatePlayersPoints() {
   for (let player of playersRoundData.value) {
-    player.previousScore = player.roundScore ? player.roundScore : player.previousScore;
-    player.roundScore = 0;
+    player.previousScore = playersStore.getRoundScore(player);
     player.roundPoints = null;
   }
 }
 
 function resetRoundPoints() {
   for (let player of playersRoundData.value) {
-    player.roundScore = 0;
     player.roundPoints = null;
   }
 }
 
 function closeRound() {
+  if (gameStore.currentRound === null) {
+    return;
+  }
+
   const message = gameStore.isUpdatingRound
     ? `Es-tu sûr de vouloir appliquer les changements pour le tour ${gameStore.currentRound} ?`
     : `Es-tu sûr d'avoir fini le tour ${gameStore.currentRound} ?`;
+
   if (confirm(message) === true) {
     sessionStore.saveRoundHistory({
       roundNumber: gameStore.currentRound!,
@@ -75,11 +74,15 @@ function isWinner(player: Player) {
 }
 
 const winners = computed(() => {
-  const minPoints = playersStore.players.reduce((minValue, currentObject) => {
-    return currentObject.previousScore < minValue ? currentObject.previousScore : minValue;
+  if (playersStore.players.length === 0) {
+    return [];
+  }
+
+  const minPoints = playersStore.players.reduce((min, player) => {
+    return player.previousScore < min ? player.previousScore : min;
   }, playersStore.players[0].previousScore);
 
-  return playersStore.players.filter((obj) => obj.previousScore === minPoints);
+  return playersStore.players.filter((player) => player.previousScore === minPoints);
 });
 
 function deletePlayer(player: Player) {
@@ -133,7 +136,7 @@ function deletePlayer(player: Player) {
                 @input="handleRoundPointsInput($event, player)"
               />
               =
-              <span>{{ player.roundScore }}</span>
+              <span>{{ playersStore.getRoundScore(player) }}</span>
             </template>
           </section>
         </template>

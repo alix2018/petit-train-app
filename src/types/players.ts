@@ -4,7 +4,6 @@ export type Player = {
   id: string;
   name: string;
   previousScore: number;
-  roundScore: number;
   roundPoints: number | null;
 };
 
