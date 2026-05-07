@@ -11,5 +11,14 @@ module.exports = {
   ],
   parserOptions: {
     ecmaVersion: 'latest'
+  },
+  rules: {
+    'vue/multi-word-component-names': [
+      'error',
+      {
+        ignores: ['Button', 'Column', 'DataTable', 'InputText', 'InputNumber']
+      }
+    ],
+    'vue/no-reserved-component-names': 'off'
   }
 };

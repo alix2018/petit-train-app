@@ -1,6 +1,5 @@
 import { type Ref, ref, watch, computed } from 'vue';
 import { defineStore } from 'pinia';
-import { ROUTE_NAMES } from '@/router';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import { useSessionStore, usePlayersStore } from '@/stores';
 import { useRoute, useRouter } from 'vue-router';
@@ -53,10 +52,6 @@ export const useGameStore = defineStore('game', () => {
       currentRound.value = newValue ? Number(newValue) : sessionStore.roundCounter;
 
       const isEditing = currentRound.value !== sessionStore.roundCounter;
-
-      if (!isEditing && sessionStore.enableCounting) {
-        return;
-      }
 
       playersStore.players.forEach((player) => {
         const previousScore = sessionStore.roundsHistory.reduce((total, history) => {

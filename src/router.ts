@@ -7,13 +7,11 @@ import { LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
 export const ROUTE_NAMES = {
   GAME: 'game',
   ROUND: 'round',
-  RESULTS: 'results',
   HISTORY: 'history'
 } as const;
 
 const routes = [
   { path: '/', name: ROUTE_NAMES.GAME, component: TheGame },
-  { path: '/results', name: ROUTE_NAMES.RESULTS, component: TheGame },
   { path: '/:id', name: ROUTE_NAMES.ROUND, component: TheGame },
   { path: '/history', name: ROUTE_NAMES.HISTORY, component: TheHistory }
 ];
@@ -34,7 +32,7 @@ router.beforeEach((to) => {
   const isNumber = !Number.isNaN(paramId);
   const storedRoundCounter = Number(localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER));
 
-  if (!isNumber || paramId < 0) {
+  if (!isNumber) {
     return {
       name: ROUTE_NAMES.ROUND,
       params: { id: storedRoundCounter }

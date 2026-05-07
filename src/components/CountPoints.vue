@@ -2,17 +2,15 @@
 import { computed } from 'vue';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
-import { useRouter, useRoute } from 'vue-router';
-import { ROUTE_NAMES } from '@/router';
+import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const sessionStore = useSessionStore();
 const router = useRouter();
-const route = useRoute();
 
 const playersRoundData = computed(() => playersStore.players);
-const isResultsPage = computed(() => route.name === ROUTE_NAMES.RESULTS);
+const isResultsPage = computed(() => sessionStore.roundCounter === -1);
 
 function countRoundScore() {
   sessionStore.enableCounting = true;
@@ -58,12 +56,8 @@ function closeRound() {
       sessionStore.roundCounter--;
     }
 
-    if (sessionStore.roundCounter < 0) {
-      router.push({ name: ROUTE_NAMES.RESULTS });
-    } else {
-      gameStore.currentRound = sessionStore.roundCounter;
-      router.push(`/${gameStore.currentRound}`);
-    }
+    gameStore.currentRound = sessionStore.roundCounter;
+    router.push(`/${gameStore.currentRound}`);
   }
 }
 
@@ -199,7 +193,7 @@ function deletePlayer(player: Player) {
         label="Finir la partie 🏁"
         severity="contrast"
         raised
-        @click="closeRound"
+        @click.stop.prevent="closeRound"
       />
       <Button
         v-else
@@ -207,7 +201,7 @@ function deletePlayer(player: Player) {
         :label="gameStore.isEditMode ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
         severity="success"
         raised
-        @click="closeRound"
+        @click.stop.prevent="closeRound"
       />
     </section>
   </section>
