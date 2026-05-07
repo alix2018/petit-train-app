@@ -89,18 +89,13 @@ export const useGameStore = defineStore('game', () => {
   }
 
   function resetGame() {
-    if (
-      confirm('Es-tu sûr de vouloir remettre les compteurs à 0 et garder les mêmes joueurs ?') ===
-      true
-    ) {
-      for (const player of playersStore.players) {
-        player.roundScore = 0;
-        player.previousScore = 0;
-        player.roundPoints = null;
-      }
-      sessionStore.resetSession();
-      router.push({ name: ROUTE_NAMES.GAME });
+    for (const player of playersStore.players) {
+      player.roundScore = 0;
+      player.previousScore = 0;
+      player.roundPoints = null;
     }
+    sessionStore.resetRounds();
+    router.push({ name: ROUTE_NAMES.GAME });
   }
 
   return {

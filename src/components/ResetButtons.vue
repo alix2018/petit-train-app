@@ -7,6 +7,18 @@ const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const sessionStore = useSessionStore();
 const router = useRouter();
+
+function handleResetGame() {
+  if (confirm('Es-tu sûr de vouloir remettre les compteurs à 0 et garder les mêmes joueurs ?')) {
+    gameStore.resetGame();
+  }
+}
+
+function handleResetPlayers() {
+  if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?')) {
+    playersStore.resetPlayers();
+  }
+}
 </script>
 
 <template>
@@ -21,14 +33,14 @@ const router = useRouter();
         type="button"
         label="Recommencer la partie"
         severity="primary"
-        @click="gameStore.resetGame"
+        @click="handleResetGame"
         raised
       />
       <Button
         type="button"
         label="Changer de joueurs"
         severity="primary"
-        @click="playersStore.resetPlayers"
+        @click="handleResetPlayers"
         raised
       />
     </div>

@@ -23,7 +23,7 @@ export const usePlayersStore = defineStore('players', () => {
   function addPlayer(newPlayerName: PlayerName) {
     players.value.push({
       id: crypto.randomUUID(),
-      name: newPlayerName,
+      name: newPlayerName ?? '',
       previousScore: 0,
       roundScore: 0,
       roundPoints: null
@@ -31,11 +31,9 @@ export const usePlayersStore = defineStore('players', () => {
   }
 
   function resetPlayers() {
-    if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') === true) {
-      players.value = [];
-      sessionStore.resetSession();
-      router.push({ name: ROUTE_NAMES.GAME });
-    }
+    players.value = [];
+    sessionStore.resetSession();
+    router.push({ name: ROUTE_NAMES.GAME });
   }
 
   function updatePlayers(updatedPlayers: Player[]) {

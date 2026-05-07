@@ -46,10 +46,14 @@ export const useSessionStore = defineStore('session', () => {
     gameStarted.value = true;
   }
 
-  function resetSession() {
+  function resetRounds() {
     roundCounter.value = DEFAULT_ROUND_NUMBER;
     enableCounting.value = false;
     roundsHistory.value = [];
+  }
+
+  function resetSession() {
+    resetRounds();
     gameStarted.value = false;
   }
 
@@ -85,6 +89,7 @@ export const useSessionStore = defineStore('session', () => {
     roundsHistory,
     readStorage,
     startGame,
+    resetRounds,
     resetSession,
     saveRoundHistory
   };
