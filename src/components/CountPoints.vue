@@ -207,7 +207,6 @@ function deletePlayer(player: Player) {
 .table-section {
   display: flex;
   flex-direction: column;
-  padding-top: 40px;
   width: 100%;
 }
 

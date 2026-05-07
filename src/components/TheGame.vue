@@ -39,6 +39,7 @@ const sessionStore = useSessionStore();
   flex-direction: column;
   min-height: calc(100vh - 80px);
   align-items: center;
+  gap: 40px;
 }
 
 header {
