@@ -166,7 +166,7 @@ function deletePlayer(player: Player) {
         v-if="gameStore.isEditMode"
         type="button"
         class="back-round"
-        :label="`← Retour au tour actuel (tour ${sessionStore.roundCounter})`"
+        :label="`← Retour au tour ${sessionStore.roundCounter}`"
         severity="secondary"
         raised
         @click="$router.push(`${sessionStore.roundCounter}`)"
@@ -194,7 +194,7 @@ function deletePlayer(player: Player) {
       <Button
         v-else
         type="button"
-        :label="gameStore.isEditMode ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
+        :label="gameStore.isEditMode ? 'Modifier 💥' : 'Finir le tour ✔'"
         severity="success"
         raised
         @click="closeRound"

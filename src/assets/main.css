@@ -1,5 +1,11 @@
 @import './base.css';
 
+html,
+body,
+#app {
+  height: 100%;
+}
+
 body {
   background: rgb(15, 126, 196);
   background: linear-gradient(
