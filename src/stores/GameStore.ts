@@ -53,6 +53,10 @@ export const useGameStore = defineStore('game', () => {
 
       const isEditing = currentRound.value !== sessionStore.roundCounter;
 
+      if (sessionStore.enableCounting && !isEditing) {
+        return;
+      }
+
       playersStore.players.forEach((player) => {
         const previousScore = sessionStore.roundsHistory.reduce((total, history) => {
           if (history.round > currentRound.value!) {

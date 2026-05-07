@@ -193,7 +193,7 @@ function deletePlayer(player: Player) {
         label="Finir la partie 🏁"
         severity="contrast"
         raised
-        @click.stop.prevent="closeRound"
+        @click="closeRound"
       />
       <Button
         v-else
@@ -201,7 +201,7 @@ function deletePlayer(player: Player) {
         :label="gameStore.isEditMode ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
         severity="success"
         raised
-        @click.stop.prevent="closeRound"
+        @click="closeRound"
       />
     </section>
   </section>
