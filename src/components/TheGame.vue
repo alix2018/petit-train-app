@@ -37,7 +37,7 @@ const sessionStore = useSessionStore();
 .game-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: calc(100vh - 80px);
   align-items: center;
   gap: 40px;
 }
