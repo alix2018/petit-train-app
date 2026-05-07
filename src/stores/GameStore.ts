@@ -38,53 +38,37 @@ export const useGameStore = defineStore('game', () => {
 
     const paramsId = route.params.id ? Number(route.params.id) : null;
     currentRound.value = paramsId ?? sessionStore.roundCounter;
+
+    hydrateRound(currentRound.value);
   }
 
   const isUpdatingRound = computed(
     () => currentRound.value !== null && currentRound.value !== sessionStore.roundCounter
   );
 
-  watch(isUpdatingRound, (newValue) => {
-    if (newValue) {
-      const currentRoundHistory = sessionStore.roundsHistory.find(
-        (h) => h.round === currentRound.value
-      );
-
-      playersStore.players.forEach((player) => {
-        const previousScore = sessionStore.roundsHistory.reduce((total, history) => {
-          if (history.round > currentRound.value!) {
-            return total + (history.roundPoints[player.id] ?? 0);
-          }
-          return total;
-        }, 0);
-
-        const roundPoints = currentRoundHistory?.roundPoints[player.id] ?? 0;
-
-        player.previousScore = previousScore;
-        player.roundPoints = roundPoints;
-        player.roundScore = previousScore + roundPoints;
-      });
-    } else if (currentRound.value === sessionStore.roundCounter) {
-      playersStore.players.forEach((player) => {
-        const previousScore = sessionStore.roundsHistory.reduce((total, history) => {
-          if (history.round > currentRound.value!) {
-            return total + (history.roundPoints[player.id] ?? 0);
-          }
-          return total;
-        }, 0);
-
-        player.previousScore = previousScore;
-        player.roundPoints = null;
-        player.roundScore = previousScore;
-      });
-    }
-  });
-
   watch(
     () => route.params.id,
     (newValue) => {
       currentRound.value = newValue ? Number(newValue) : sessionStore.roundCounter;
-      hydrateRound(currentRound.value);
+
+      const isUpdating = currentRound.value !== sessionStore.roundCounter;
+
+      playersStore.players.forEach((player) => {
+        const previousScore = sessionStore.roundsHistory.reduce((total, history) => {
+          if (history.round > currentRound.value!) {
+            return total + (history.roundPoints[player.id] ?? 0);
+          }
+          return total;
+        }, 0);
+
+        const currentRoundHistory = sessionStore.roundsHistory.find(
+          (h) => h.round === currentRound.value
+        );
+
+        player.previousScore = previousScore;
+        player.roundPoints = isUpdating ? currentRoundHistory?.roundPoints[player.id] ?? 0 : null;
+        player.roundScore = previousScore + (player.roundPoints ?? 0);
+      });
     },
     { immediate: true }
   );
