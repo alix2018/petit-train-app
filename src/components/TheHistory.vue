@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { usePlayersStore, useGameStore } from '@/stores';
+import { usePlayersStore, useGameStore, useSessionStore } from '@/stores';
 import { useRouter } from 'vue-router';
 
 const playersStore = usePlayersStore();
 const gameStore = useGameStore();
+const sessionStore = useSessionStore();
 const router = useRouter();
 
-const isResultsPage = computed(() => gameStore.roundCounter === -1);
+const isResultsPage = computed(() => sessionStore.roundCounter === -1);
 
 function onEditHistory(selectedRound) {
   gameStore.hydrateRound(selectedRound);
@@ -21,7 +22,7 @@ const roundsTotalScore = computed(() => {
     result[player.id] = 0;
   });
 
-  gameStore.roundsHistory.forEach((round) => {
+  sessionStore.roundsHistory.forEach((round) => {
     for (const playerId in round.roundPoints) {
       result[playerId] += round.roundPoints[playerId];
     }
@@ -35,8 +36,8 @@ const roundsTotalScore = computed(() => {
   <img src="/src/assets/back-arrow.svg" class="back-button" @click="$router.back()" />
   <h1 class="title">Historique</h1>
   <DataTable
-    v-if="gameStore.roundsHistory.length > 0"
-    :value="gameStore.roundsHistory"
+    v-if="sessionStore.roundsHistory.length > 0"
+    :value="sessionStore.roundsHistory"
     stripedRows
     showGridlines
     size="small"

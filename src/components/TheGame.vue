@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
 import AddPlayers from './AddPlayers.vue';
 import CountPoints from './CountPoints.vue';
 import ResetButtons from './ResetButtons.vue';
-import { useGameStore, usePlayersStore } from '@/stores';
+import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
+const sessionStore = useSessionStore();
 
 onMounted(() => {
   gameStore.initGame();
@@ -14,7 +15,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <header v-if="!gameStore.gameStarted">
+  <header v-if="!sessionStore.gameStarted">
     <h1>Train Mexicain</h1>
     <AddPlayers />
   </header>
@@ -22,13 +23,13 @@ onMounted(() => {
   <CountPoints />
 
   <Button
-    v-if="playersStore.players.length >= 2 && !gameStore.gameStarted"
+    v-if="playersStore.players.length >= 2 && !sessionStore.gameStarted"
     type="button"
     label="Commencer la partie 🚂"
     class="start-game"
     severity="secondary"
     raised
-    @click="gameStore.startGame"
+    @click="sessionStore.startGame"
   />
 
   <footer class="footer">

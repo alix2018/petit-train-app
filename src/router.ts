@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import TheGame from '@/components/TheGame.vue';
 import TheHistory from '@/components/TheHistory.vue';
-import { useGameStore } from '@/stores';
+import { useSessionStore } from '@/stores';
 import { LOCAL_STORAGE_ROUND_COUNTER } from '@/constants';
 
 export const ROUTE_NAMES = {
@@ -22,16 +22,14 @@ export const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  const gameStore = useGameStore();
+  const sessionStore = useSessionStore();
 
   if (to.name !== ROUTE_NAMES.ROUND) {
     return true;
   }
 
   const paramId = Number(to.params.id);
-
   const isNumber = !Number.isNaN(paramId);
-
   const storedRoundCounter = Number(localStorage.getItem(LOCAL_STORAGE_ROUND_COUNTER));
 
   if (!isNumber || paramId < 0) {
@@ -41,7 +39,7 @@ router.beforeEach((to) => {
     };
   }
 
-  if (!gameStore.gameStarted) {
+  if (!sessionStore.gameStarted) {
     return { name: ROUTE_NAMES.GAME };
   }
 

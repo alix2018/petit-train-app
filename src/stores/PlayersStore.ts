@@ -4,12 +4,12 @@ import { ROUTE_NAMES } from '@/router';
 import { useRouter } from 'vue-router';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import type { Player, Players, PlayerName } from '@/types';
-import { useGameStore } from '@/stores';
+import { useSessionStore } from '@/stores';
 
 export const usePlayersStore = defineStore('players', () => {
   const players: Ref<Players> = ref([]);
 
-  const gameStore = useGameStore();
+  const sessionStore = useSessionStore();
   const router = useRouter();
 
   watch(
@@ -31,12 +31,9 @@ export const usePlayersStore = defineStore('players', () => {
   }
 
   function resetPlayers() {
-    if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
+    if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') === true) {
       players.value = [];
-      gameStore.gameStarted = false;
-      gameStore.enableCounting = false;
-      gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
-      gameStore.roundsHistory = [];
+      sessionStore.resetSession();
       router.push({ name: ROUTE_NAMES.GAME });
     }
   }

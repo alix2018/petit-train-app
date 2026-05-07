@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { Player } from '@/types';
-import { useGameStore, usePlayersStore } from '@/stores';
+import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
 import { useRouter } from 'vue-router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
+const sessionStore = useSessionStore();
 const router = useRouter();
 const playersRoundData = computed(() => playersStore.players);
-const isResultsPage = computed(() => gameStore.roundCounter === -1);
+const isResultsPage = computed(() => sessionStore.roundCounter === -1);
 
 function countRoundScore() {
-  gameStore.enableCounting = true;
+  sessionStore.enableCounting = true;
   for (let player of playersRoundData.value) {
     player.roundScore = player.previousScore;
   }
@@ -44,35 +45,31 @@ function closeRound() {
     ? `Es-tu sûr de vouloir appliquer les changements pour le tour ${gameStore.currentRound} ?`
     : `Es-tu sûr d'avoir fini le tour ${gameStore.currentRound} ?`;
   if (confirm(message) === true) {
-    gameStore.saveRoundHistory({
+    sessionStore.saveRoundHistory({
       roundNumber: gameStore.currentRound,
       players: playersStore.players
     });
     updatePlayersPoints();
     playersStore.updatePlayers(playersRoundData.value);
-    gameStore.enableCounting = false;
+    sessionStore.enableCounting = false;
 
     if (!gameStore.isUpdatingRound) {
-      gameStore.roundCounter--;
+      sessionStore.roundCounter--;
     }
 
-    gameStore.currentRound = gameStore.roundCounter;
+    gameStore.currentRound = sessionStore.roundCounter;
     router.push(`/${gameStore.currentRound}`);
   }
 }
 
 const rowClass = (player: Player) => {
-  return [
-    {
-      'row-highlighted': isWinner(player)
-    }
-  ];
+  return [{ 'row-highlighted': isWinner(player) }];
 };
 
 function isWinner(player: Player) {
   return (
-    gameStore.roundCounter < gameStore.DEFAULT_ROUND_NUMBER &&
-    gameStore.gameStarted &&
+    sessionStore.roundCounter < sessionStore.DEFAULT_ROUND_NUMBER &&
+    sessionStore.gameStarted &&
     winners.value.some((winner) => winner.name === player.name)
   );
 }
@@ -91,7 +88,7 @@ function deletePlayer(player: Player) {
 </script>
 
 <template>
-  <template v-if="gameStore.gameStarted">
+  <template v-if="sessionStore.gameStarted">
     <img
       v-if="!isResultsPage"
       :src="`/src/assets/double${gameStore.currentRound}.png`"
@@ -111,7 +108,7 @@ function deletePlayer(player: Player) {
       scrollable
       class="data-table"
     >
-      <Column field="name" header="Noms" :sortable="!gameStore.enableCounting">
+      <Column field="name" header="Noms" :sortable="!sessionStore.enableCounting">
         <template #body="{ data: player }">
           <span v-if="isWinner(player)">🏆</span> {{ player.name }}
         </template>
@@ -120,13 +117,13 @@ function deletePlayer(player: Player) {
         field="previousScore"
         header="Points"
         key="roundScore"
-        :sortable="!gameStore.enableCounting"
+        :sortable="!sessionStore.enableCounting"
       >
         <template #body="{ data: player }">
           <section class="row-points">
             <span>{{ player.previousScore }}</span>
 
-            <template v-if="gameStore.enableCounting || gameStore.isUpdatingRound">
+            <template v-if="sessionStore.enableCounting || gameStore.isUpdatingRound">
               +
               <input
                 type="number"
@@ -141,7 +138,7 @@ function deletePlayer(player: Player) {
           </section>
         </template>
       </Column>
-      <Column v-if="!gameStore.gameStarted" style="width: 10%">
+      <Column v-if="!sessionStore.gameStarted" style="width: 10%">
         <template #body="slotProps">
           <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
         </template>
@@ -150,8 +147,8 @@ function deletePlayer(player: Player) {
 
     <Button
       v-if="
-        gameStore.gameStarted &&
-        !gameStore.enableCounting &&
+        sessionStore.gameStarted &&
+        !sessionStore.enableCounting &&
         !isResultsPage &&
         !gameStore.isUpdatingRound
       "
@@ -163,17 +160,19 @@ function deletePlayer(player: Player) {
       @click="countRoundScore"
     />
     <section
-      v-if="(gameStore.enableCounting && gameStore.roundCounter >= 0) || gameStore.isUpdatingRound"
+      v-if="
+        (sessionStore.enableCounting && sessionStore.roundCounter >= 0) || gameStore.isUpdatingRound
+      "
       class="close-round"
     >
       <Button
         v-if="gameStore.isUpdatingRound"
         type="button"
         class="back-round"
-        :label="`← Retour au tour actuel (tour ${gameStore.roundCounter})`"
+        :label="`← Retour au tour actuel (tour ${sessionStore.roundCounter})`"
         severity="secondary"
         raised
-        @click="$router.push(`${gameStore.roundCounter}`)"
+        @click="$router.push(`${sessionStore.roundCounter}`)"
       />
       <Button
         v-if="!gameStore.isUpdatingRound"
@@ -183,12 +182,12 @@ function deletePlayer(player: Player) {
         severity="secondary"
         raised
         @click="
-          gameStore.enableCounting = false;
+          sessionStore.enableCounting = false;
           resetRoundPoints();
         "
       />
       <Button
-        v-if="gameStore.roundCounter === 0 && !gameStore.isUpdatingRound"
+        v-if="sessionStore.roundCounter === 0 && !gameStore.isUpdatingRound"
         type="button"
         label="Finir la partie 🏁"
         severity="contrast"

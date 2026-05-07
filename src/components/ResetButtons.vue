@@ -1,16 +1,21 @@
 <script setup lang="ts">
-import { useGameStore, usePlayersStore } from '@/stores';
+import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
 import { useRouter } from 'vue-router';
+import { ROUTE_NAMES } from '@/router';
 
 const gameStore = useGameStore();
 const playersStore = usePlayersStore();
-
+const sessionStore = useSessionStore();
 const router = useRouter();
 </script>
 
 <template>
-  <section v-if="gameStore.gameStarted" class="buttons-wrapper">
-    <Button label="Historique" severity="secondary" @click="router.push({ name: 'history' })" />
+  <section v-if="sessionStore.gameStarted" class="buttons-wrapper">
+    <Button
+      label="Historique"
+      severity="secondary"
+      @click="router.push({ name: ROUTE_NAMES.HISTORY })"
+    />
     <div class="reset-buttons">
       <Button
         type="button"
