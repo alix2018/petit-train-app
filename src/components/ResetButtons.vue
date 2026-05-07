@@ -24,6 +24,7 @@ function handleResetPlayers() {
 <template>
   <section v-if="sessionStore.gameStarted" class="buttons-wrapper">
     <Button
+      v-if="!gameStore.isEditMode"
       label="Historique"
       severity="secondary"
       @click="router.push({ name: ROUTE_NAMES.HISTORY })"

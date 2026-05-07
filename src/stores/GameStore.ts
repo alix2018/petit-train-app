@@ -16,7 +16,10 @@ export const useGameStore = defineStore('game', () => {
   let initialized = false;
 
   function initGame() {
-    if (initialized) return;
+    if (initialized) {
+      return;
+    }
+
     initialized = true;
 
     const storage = sessionStore.readStorage();
@@ -40,7 +43,7 @@ export const useGameStore = defineStore('game', () => {
     hydrateRound(currentRound.value);
   }
 
-  const isUpdatingRound = computed(
+  const isEditMode = computed(
     () => currentRound.value !== null && currentRound.value !== sessionStore.roundCounter
   );
 
@@ -49,7 +52,11 @@ export const useGameStore = defineStore('game', () => {
     (newValue) => {
       currentRound.value = newValue ? Number(newValue) : sessionStore.roundCounter;
 
-      const isUpdating = currentRound.value !== sessionStore.roundCounter;
+      const isEditing = currentRound.value !== sessionStore.roundCounter;
+
+      if (!isEditing && sessionStore.enableCounting) {
+        return;
+      }
 
       playersStore.players.forEach((player) => {
         const previousScore = sessionStore.roundsHistory.reduce((total, history) => {
@@ -64,7 +71,7 @@ export const useGameStore = defineStore('game', () => {
         );
 
         player.previousScore = previousScore;
-        player.roundPoints = isUpdating ? currentRoundHistory?.roundPoints[player.id] ?? 0 : null;
+        player.roundPoints = isEditing ? currentRoundHistory?.roundPoints[player.id] ?? 0 : null;
       });
     },
     { immediate: true }
@@ -81,7 +88,9 @@ export const useGameStore = defineStore('game', () => {
 
   function hydrateRound(round: number) {
     const history = sessionStore.roundsHistory.find((r) => r.round === round);
-    if (!history) return;
+    if (!history) {
+      return;
+    }
 
     playersStore.players.forEach((player) => {
       player.roundPoints = history.roundPoints[player.id] ?? null;
@@ -106,7 +115,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     currentRound,
-    isUpdatingRound,
+    isEditMode,
     initGame,
     hydrateRound,
     startGame,

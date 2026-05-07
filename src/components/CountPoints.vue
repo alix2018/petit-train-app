@@ -41,7 +41,7 @@ function closeRound() {
     return;
   }
 
-  const message = gameStore.isUpdatingRound
+  const message = gameStore.isEditMode
     ? `Es-tu sûr de vouloir appliquer les changements pour le tour ${gameStore.currentRound} ?`
     : `Es-tu sûr d'avoir fini le tour ${gameStore.currentRound} ?`;
 
@@ -54,7 +54,7 @@ function closeRound() {
     playersStore.updatePlayers(playersRoundData.value);
     sessionStore.enableCounting = false;
 
-    if (!gameStore.isUpdatingRound) {
+    if (!gameStore.isEditMode) {
       sessionStore.roundCounter--;
     }
 
@@ -132,7 +132,7 @@ function deletePlayer(player: Player) {
           <section class="row-points">
             <span>{{ player.previousScore }}</span>
 
-            <template v-if="sessionStore.enableCounting || gameStore.isUpdatingRound">
+            <template v-if="sessionStore.enableCounting || gameStore.isEditMode">
               +
               <input
                 type="number"
@@ -159,7 +159,7 @@ function deletePlayer(player: Player) {
         sessionStore.gameStarted &&
         !sessionStore.enableCounting &&
         !isResultsPage &&
-        !gameStore.isUpdatingRound
+        !gameStore.isEditMode
       "
       type="button"
       class="count-round-score"
@@ -169,13 +169,11 @@ function deletePlayer(player: Player) {
       @click="countRoundScore"
     />
     <section
-      v-if="
-        (sessionStore.enableCounting && sessionStore.roundCounter >= 0) || gameStore.isUpdatingRound
-      "
+      v-if="(sessionStore.enableCounting && sessionStore.roundCounter >= 0) || gameStore.isEditMode"
       class="close-round"
     >
       <Button
-        v-if="gameStore.isUpdatingRound"
+        v-if="gameStore.isEditMode"
         type="button"
         class="back-round"
         :label="`← Retour au tour actuel (tour ${sessionStore.roundCounter})`"
@@ -184,7 +182,7 @@ function deletePlayer(player: Player) {
         @click="$router.push(`${sessionStore.roundCounter}`)"
       />
       <Button
-        v-if="!gameStore.isUpdatingRound"
+        v-if="!gameStore.isEditMode"
         type="button"
         class="back-round"
         label="Annuler"
@@ -196,7 +194,7 @@ function deletePlayer(player: Player) {
         "
       />
       <Button
-        v-if="sessionStore.roundCounter === 0 && !gameStore.isUpdatingRound"
+        v-if="sessionStore.roundCounter === 0 && !gameStore.isEditMode"
         type="button"
         label="Finir la partie 🏁"
         severity="contrast"
@@ -206,7 +204,7 @@ function deletePlayer(player: Player) {
       <Button
         v-else
         type="button"
-        :label="gameStore.isUpdatingRound ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
+        :label="gameStore.isEditMode ? 'Modifier le tour 💥' : 'Finir le tour ✔'"
         severity="success"
         raised
         @click="closeRound"
