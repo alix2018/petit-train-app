@@ -46,7 +46,7 @@ function closeRound() {
     : `Es-tu sûr d'avoir fini le tour ${gameStore.currentRound} ?`;
   if (confirm(message) === true) {
     sessionStore.saveRoundHistory({
-      roundNumber: gameStore.currentRound,
+      roundNumber: gameStore.currentRound!,
       players: playersStore.players
     });
     updatePlayersPoints();

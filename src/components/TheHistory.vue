@@ -10,7 +10,7 @@ const router = useRouter();
 
 const isResultsPage = computed(() => sessionStore.roundCounter === -1);
 
-function onEditHistory(selectedRound) {
+function onEditHistory(selectedRound: number) {
   gameStore.hydrateRound(selectedRound);
   router.push(`/${selectedRound}`);
 }

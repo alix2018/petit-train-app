@@ -1,9 +1,11 @@
-export type Players = Player[];
+export type PlayerName = string | null;
+
 export type Player = {
   id: string;
-  name: PlayerName;
+  name: string;
   previousScore: number;
   roundScore: number;
   roundPoints: number | null;
-} | null;
-export type PlayerName = string | null;
+};
+
+export type Players = Player[];
