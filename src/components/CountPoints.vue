@@ -92,11 +92,7 @@ function deletePlayer(player: Player) {
 
 <template>
   <template v-if="sessionStore.gameStarted">
-    <img
-      v-if="!isResultsPage"
-      :src="`/src/assets/double${gameStore.currentRound}.png`"
-      height="70px"
-    />
+    <img v-if="!isResultsPage" :src="`/double${gameStore.currentRound}.png`" height="70px" />
     <h1 v-else>🎉 Résultats 🎉</h1>
   </template>
 
