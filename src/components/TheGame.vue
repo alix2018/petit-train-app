@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import AddPlayers from './AddPlayers.vue';
 import CountPoints from './CountPoints.vue';
 import ResetButtons from './ResetButtons.vue';
-import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
+import { usePlayersStore, useSessionStore } from '@/stores';
 
-const gameStore = useGameStore();
 const playersStore = usePlayersStore();
 const sessionStore = useSessionStore();
-
-onMounted(() => {
-  gameStore.initGame();
-});
 </script>
 
 <template>

@@ -40,10 +40,11 @@ const roundsTotalScore = computed(() => {
     :value="sessionStore.roundsHistory"
     stripedRows
     showGridlines
+    scrollable
     size="small"
     class="historique-table"
   >
-    <Column field="tour">
+    <Column field="tour" frozen>
       <template #header>
         <span style="font-weight: bold; width: 48px">Tour</span>
       </template>
@@ -99,6 +100,8 @@ const roundsTotalScore = computed(() => {
 
 .historique-table {
   margin-top: 20px;
+  overflow-x: auto;
+  width: 100%;
 }
 
 .round-column {
