@@ -9,29 +9,38 @@ const sessionStore = useSessionStore();
 </script>
 
 <template>
-  <header v-if="!sessionStore.gameStarted">
-    <h1>Train Mexicain</h1>
-    <AddPlayers />
-  </header>
+  <div class="game-wrapper">
+    <header v-if="!sessionStore.gameStarted">
+      <h1>Train Mexicain</h1>
+      <AddPlayers />
+    </header>
 
-  <CountPoints />
+    <CountPoints />
 
-  <Button
-    v-if="playersStore.players.length >= 2 && !sessionStore.gameStarted"
-    type="button"
-    label="Commencer la partie 🚂"
-    class="start-game"
-    severity="secondary"
-    raised
-    @click="sessionStore.startGame"
-  />
+    <Button
+      v-if="playersStore.players.length >= 2 && !sessionStore.gameStarted"
+      type="button"
+      label="Commencer la partie 🚂"
+      class="start-game"
+      severity="secondary"
+      raised
+      @click="sessionStore.startGame"
+    />
 
-  <footer class="footer">
-    <ResetButtons />
-  </footer>
+    <footer class="footer">
+      <ResetButtons />
+    </footer>
+  </div>
 </template>
 
 <style scoped>
+.game-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  align-items: center;
+}
+
 header {
   display: flex;
   flex-direction: column;
@@ -45,9 +54,8 @@ header {
 }
 
 .footer {
-  position: absolute;
-  bottom: 20px;
   display: flex;
   gap: 5px;
+  margin-top: auto;
 }
 </style>
