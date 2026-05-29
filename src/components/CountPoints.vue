@@ -103,32 +103,34 @@ function deletePlayer(player: Player) {
   playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
 }
 
+function onRowReorder(event: { value: Player[] }) {
+  playersStore.players = event.value;
+}
+
 function showCurrentPlayer(player: Player) {
   return player.id === startingPlayer.value?.id && !gameStore.isEditMode;
 }
 
-const tableRef = ref<{ $el: HTMLElement } | null>(null);
+// Touch devices only — desktop keeps PrimeVue's reorderableRows (HTML5 DnD)
+const isTouchDevice = 'ontouchstart' in window;
+const tableWrapper = ref<HTMLElement | null>(null);
 let sortableInstance: Sortable | null = null;
 
 function initSortable() {
   sortableInstance?.destroy();
   sortableInstance = null;
-  const tbody = tableRef.value?.$el?.querySelector('tbody');
-
+  const tbody = tableWrapper.value?.querySelector('tbody');
   if (!tbody) {
     return;
   }
-
   sortableInstance = Sortable.create(tbody as HTMLElement, {
     animation: 150,
-    handle: '.drag-handle',
+    handle: '.drag-handle-cell',
     onEnd(event) {
       const { oldIndex, newIndex } = event;
-
       if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
         return;
       }
-
       const reordered = [...playersStore.players];
       const [moved] = reordered.splice(oldIndex, 1);
       reordered.splice(newIndex, 0, moved);
@@ -138,24 +140,26 @@ function initSortable() {
   });
 }
 
-onMounted(() => {
-  if (!sessionStore.gameStarted) {
-    nextTick(initSortable);
-  }
-});
+if (isTouchDevice) {
+  onMounted(() => {
+    if (!sessionStore.gameStarted) {
+      nextTick(initSortable);
+    }
+  });
 
-watch([() => sessionStore.gameStarted, () => playersRoundData.value.length], ([started]) => {
-  if (!started) {
-    nextTick(initSortable);
-  } else {
+  watch([() => sessionStore.gameStarted, () => playersRoundData.value.length], ([started]) => {
+    if (!started) {
+      nextTick(initSortable);
+    } else {
+      sortableInstance?.destroy();
+      sortableInstance = null;
+    }
+  });
+
+  onUnmounted(() => {
     sortableInstance?.destroy();
-    sortableInstance = null;
-  }
-});
-
-onUnmounted(() => {
-  sortableInstance?.destroy();
-});
+  });
+}
 </script>
 
 <template>
@@ -165,66 +169,76 @@ onUnmounted(() => {
   </template>
 
   <section class="table-section">
-    <DataTable
-      ref="tableRef"
-      v-if="playersRoundData.length > 0"
-      :value="playersRoundData"
-      :rowClass="rowClass"
-      dataKey="id"
-      size="small"
-      showGridlines
-      removableSort
-      scrollable
-      class="data-table"
-    >
-      <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
-        <template #body>
-          <i class="pi pi-bars drag-handle" />
-        </template>
-      </Column>
-      <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
-        <template #body="{ index }">
-          {{ index + 1 }}
-        </template>
-      </Column>
-      <Column field="name" header="Noms" :sortable="!sessionStore.enableCounting">
-        <template #body="{ data: player }">
-          <span v-if="showCurrentPlayer(player)">🚩</span>
-          <span v-if="isWinner(player)">🏆</span>
-          {{ player.name }}
-        </template>
-      </Column>
-      <Column
-        field="previousScore"
-        header="Points"
-        key="roundScore"
-        :sortable="!sessionStore.enableCounting"
+    <div ref="tableWrapper">
+      <DataTable
+        v-if="playersRoundData.length > 0"
+        :value="playersRoundData"
+        :rowClass="rowClass"
+        dataKey="id"
+        size="small"
+        showGridlines
+        removableSort
+        scrollable
+        class="data-table"
+        :reorderableRows="!sessionStore.gameStarted"
+        @rowReorder="onRowReorder"
       >
-        <template #body="{ data: player }">
-          <section class="row-points">
-            <span>{{ player.previousScore }}</span>
+        <Column
+          v-if="!sessionStore.gameStarted"
+          rowReorder
+          headerStyle="width: 4rem"
+          bodyStyle="text-align: center;"
+          bodyClass="drag-handle-cell"
+        />
+        <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
+          <template #body="{ index }">
+            {{ index + 1 }}
+          </template>
+        </Column>
+        <Column field="name" header="Noms" :sortable="!sessionStore.enableCounting">
+          <template #body="{ data: player }">
+            <span v-if="showCurrentPlayer(player)">🚩</span>
+            <span v-if="isWinner(player)">🏆</span>
+            {{ player.name }}
+          </template>
+        </Column>
+        <Column
+          field="previousScore"
+          header="Points"
+          key="roundScore"
+          :sortable="!sessionStore.enableCounting"
+        >
+          <template #body="{ data: player }">
+            <section class="row-points">
+              <span>{{ player.previousScore }}</span>
 
-            <template v-if="sessionStore.enableCounting || gameStore.isEditMode">
-              +
-              <input
-                type="number"
-                :id="player.id.toString()"
-                :value="player.roundPoints ?? ''"
-                class="input-points"
-                @input="handleRoundPointsInput($event, player)"
-              />
-              =
-              <span>{{ playersStore.getRoundScore(player) }}</span>
-            </template>
-          </section>
-        </template>
-      </Column>
-      <Column v-if="!sessionStore.gameStarted" style="width: 10%">
-        <template #body="slotProps">
-          <Button icon="pi pi-trash" severity="danger" text @click="deletePlayer(slotProps.data)" />
-        </template>
-      </Column>
-    </DataTable>
+              <template v-if="sessionStore.enableCounting || gameStore.isEditMode">
+                +
+                <input
+                  type="number"
+                  :id="player.id.toString()"
+                  :value="player.roundPoints ?? ''"
+                  class="input-points"
+                  @input="handleRoundPointsInput($event, player)"
+                />
+                =
+                <span>{{ playersStore.getRoundScore(player) }}</span>
+              </template>
+            </section>
+          </template>
+        </Column>
+        <Column v-if="!sessionStore.gameStarted" style="width: 10%">
+          <template #body="slotProps">
+            <Button
+              icon="pi pi-trash"
+              severity="danger"
+              text
+              @click="deletePlayer(slotProps.data)"
+            />
+          </template>
+        </Column>
+      </DataTable>
+    </div>
 
     <Button
       v-if="
@@ -335,10 +349,5 @@ td {
   justify-content: space-between;
   margin-top: 20px;
   gap: 20px;
-}
-
-.drag-handle {
-  cursor: grab;
-  touch-action: none;
 }
 </style>
