@@ -190,7 +190,7 @@ if (isTouchDevice) {
           bodyStyle="text-align: center;"
           bodyClass="drag-handle-cell"
         />
-        <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
+        <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem; text-align: center">
           <template #body="{ index }">
             {{ index + 1 }}
           </template>
