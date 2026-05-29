@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch, nextTick, onMounted, onUnmounted } from 'vue';
+import Sortable from 'sortablejs';
 import type { Player } from '@/types';
 import { useGameStore, usePlayersStore, useSessionStore } from '@/stores';
 import { useRouter } from 'vue-router';
@@ -71,7 +72,6 @@ const startingPlayer = computed(() => {
     return null;
   const roundIndex = sessionStore.DEFAULT_ROUND_NUMBER - gameStore.currentRound;
   const idx = roundIndex % playersStore.players.length;
-  console.log('startingPlayer', playersStore.players[idx]);
   return playersStore.players[idx];
 });
 
@@ -103,13 +103,59 @@ function deletePlayer(player: Player) {
   playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
 }
 
-function onRowReorder(event: { value: Player[] }) {
-  playersStore.players = event.value;
-}
-
 function showCurrentPlayer(player: Player) {
   return player.id === startingPlayer.value?.id && !gameStore.isEditMode;
 }
+
+const tableRef = ref<{ $el: HTMLElement } | null>(null);
+let sortableInstance: Sortable | null = null;
+
+function initSortable() {
+  sortableInstance?.destroy();
+  sortableInstance = null;
+  const tbody = tableRef.value?.$el?.querySelector('tbody');
+
+  if (!tbody) {
+    return;
+  }
+
+  sortableInstance = Sortable.create(tbody as HTMLElement, {
+    animation: 150,
+    handle: '.drag-handle',
+    onEnd(event) {
+      const { oldIndex, newIndex } = event;
+
+      if (oldIndex === undefined || newIndex === undefined || oldIndex === newIndex) {
+        return;
+      }
+
+      const reordered = [...playersStore.players];
+      const [moved] = reordered.splice(oldIndex, 1);
+      reordered.splice(newIndex, 0, moved);
+      playersStore.players = reordered;
+      nextTick(initSortable);
+    }
+  });
+}
+
+onMounted(() => {
+  if (!sessionStore.gameStarted) {
+    nextTick(initSortable);
+  }
+});
+
+watch([() => sessionStore.gameStarted, () => playersRoundData.value.length], ([started]) => {
+  if (!started) {
+    nextTick(initSortable);
+  } else {
+    sortableInstance?.destroy();
+    sortableInstance = null;
+  }
+});
+
+onUnmounted(() => {
+  sortableInstance?.destroy();
+});
 </script>
 
 <template>
@@ -120,18 +166,22 @@ function showCurrentPlayer(player: Player) {
 
   <section class="table-section">
     <DataTable
+      ref="tableRef"
       v-if="playersRoundData.length > 0"
       :value="playersRoundData"
       :rowClass="rowClass"
+      dataKey="id"
       size="small"
       showGridlines
       removableSort
       scrollable
       class="data-table"
-      :reorderableRows="!sessionStore.gameStarted"
-      @rowReorder="onRowReorder"
     >
-      <Column v-if="!sessionStore.gameStarted" rowReorder headerStyle="width: 2.5rem" />
+      <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
+        <template #body>
+          <i class="pi pi-bars drag-handle" />
+        </template>
+      </Column>
       <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
         <template #body="{ index }">
           {{ index + 1 }}
@@ -285,5 +335,10 @@ td {
   justify-content: space-between;
   margin-top: 20px;
   gap: 20px;
+}
+
+.drag-handle {
+  cursor: grab;
+  touch-action: none;
 }
 </style>
