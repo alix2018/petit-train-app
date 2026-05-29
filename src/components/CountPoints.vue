@@ -61,6 +61,20 @@ function closeRound() {
   }
 }
 
+const startingPlayer = computed(() => {
+  if (
+    !sessionStore.gameStarted ||
+    isResultsPage.value ||
+    gameStore.currentRound === null ||
+    playersStore.players.length === 0
+  )
+    return null;
+  const roundIndex = sessionStore.DEFAULT_ROUND_NUMBER - gameStore.currentRound;
+  const idx = roundIndex % playersStore.players.length;
+  console.log('startingPlayer', playersStore.players[idx]);
+  return playersStore.players[idx];
+});
+
 const rowClass = (player: Player) => {
   return [{ 'row-highlighted': isWinner(player) }];
 };
@@ -88,6 +102,14 @@ const winners = computed(() => {
 function deletePlayer(player: Player) {
   playersStore.players = playersStore.players.filter((element) => element.id !== player.id);
 }
+
+function onRowReorder(event: { value: Player[] }) {
+  playersStore.players = event.value;
+}
+
+function showCurrentPlayer(player: Player) {
+  return player.id === startingPlayer.value?.id && !gameStore.isEditMode;
+}
 </script>
 
 <template>
@@ -106,10 +128,20 @@ function deletePlayer(player: Player) {
       removableSort
       scrollable
       class="data-table"
+      :reorderableRows="!sessionStore.gameStarted"
+      @rowReorder="onRowReorder"
     >
+      <Column v-if="!sessionStore.gameStarted" rowReorder headerStyle="width: 2.5rem" />
+      <Column v-if="!sessionStore.gameStarted" style="width: 2.5rem">
+        <template #body="{ index }">
+          {{ index + 1 }}
+        </template>
+      </Column>
       <Column field="name" header="Noms" :sortable="!sessionStore.enableCounting">
         <template #body="{ data: player }">
-          <span v-if="isWinner(player)">🏆</span> {{ player.name }}
+          <span v-if="showCurrentPlayer(player)">🚩</span>
+          <span v-if="isWinner(player)">🏆</span>
+          {{ player.name }}
         </template>
       </Column>
       <Column
