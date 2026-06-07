@@ -3,6 +3,7 @@ import { defineStore } from 'pinia';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import { useSessionStore, usePlayersStore } from '@/stores';
 import { useRoute, useRouter } from 'vue-router';
+import { ROUTE_NAMES } from '@/router';
 
 export const useGameStore = defineStore('game', () => {
   const sessionStore = useSessionStore();
@@ -107,9 +108,8 @@ export const useGameStore = defineStore('game', () => {
       player.roundPoints = null;
     }
     sessionStore.resetSession();
-    sessionStore.startGame();
     currentRound.value = sessionStore.roundCounter;
-    router.push(`/${sessionStore.roundCounter}`);
+    router.push(ROUTE_NAMES.GAME);
   }
 
   return {
