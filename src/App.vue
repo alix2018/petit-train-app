@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import TheGame from './components/TheGame.vue';
+import { onMounted } from 'vue';
+import { useGameStore } from '@/stores';
+
+const gameStore = useGameStore();
+
+onMounted(() => {
+  gameStore.initGame();
+});
 </script>
 
 <template>
-  <TheGame />
+  <router-view />
 </template>
 
 <style scoped></style>

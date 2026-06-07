@@ -1,10 +1,10 @@
-import { type Ref, ref } from 'vue';
-export type Players = Player[];
+export type PlayerName = string | null;
+
 export type Player = {
   id: string;
-  name: PlayerName;
-  points: number;
-  roundPoints: number;
-  tempInputPoints: number | null;
+  name: string;
+  previousScore: number;
+  roundPoints: number | null;
 };
-export type PlayerName = string | null;
+
+export type Players = Player[];

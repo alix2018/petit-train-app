@@ -2,6 +2,7 @@ import './assets/main.css';
 import 'primevue/resources/themes/aura-light-blue/theme.css';
 import 'primeicons/primeicons.css';
 
+import { router } from '@/router';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
@@ -15,6 +16,7 @@ import App from './App.vue';
 
 const app = createApp(App);
 
+app.use(router);
 app.use(createPinia());
 app.use(PrimeVue);
 app.component('Button', Button);

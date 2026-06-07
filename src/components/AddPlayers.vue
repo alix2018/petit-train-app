@@ -5,12 +5,13 @@ import { usePlayersStore } from '@/stores';
 
 const playersStore = usePlayersStore();
 const playerName: Ref<PlayerName> = ref(null);
-const playerNameInput: Ref<HTMLInputElement | null> = ref(null);
+const playerInputRef = ref();
 
 function savePlayer() {
   if (playerName.value) {
     playersStore.addPlayer(playerName.value);
     playerName.value = null;
+    playerInputRef.value?.$el?.focus();
   }
 }
 </script>
@@ -18,9 +19,9 @@ function savePlayer() {
 <template>
   <form @submit.prevent="savePlayer">
     <InputText
+      ref="playerInputRef"
       type="text"
       id="player"
-      ref="playerNameInput"
       placeholder="Nom du joueur"
       v-model="playerName"
       minlength="1"

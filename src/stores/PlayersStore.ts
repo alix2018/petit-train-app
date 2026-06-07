@@ -1,17 +1,16 @@
 import { type Ref, ref, watch } from 'vue';
 import { defineStore } from 'pinia';
+import { ROUTE_NAMES } from '@/router';
+import { useRouter } from 'vue-router';
 import { LOCAL_STORAGE_PLAYERS_ARRAY } from '@/constants';
 import type { Player, Players, PlayerName } from '@/types';
-import { useGameStore } from '@/stores';
+import { useSessionStore } from '@/stores';
 
 export const usePlayersStore = defineStore('players', () => {
-  const gameStore = useGameStore();
   const players: Ref<Players> = ref([]);
-  // TO TEST;
-  // const players: Ref<Players> = ref([
-  //   { id: 1, name: 'Steph', points: 0 },
-  //   { id: 2, name: 'Nico', points: 0 }
-  // ]);
+
+  const sessionStore = useSessionStore();
+  const router = useRouter();
 
   watch(
     () => players,
@@ -24,25 +23,25 @@ export const usePlayersStore = defineStore('players', () => {
   function addPlayer(newPlayerName: PlayerName) {
     players.value.push({
       id: crypto.randomUUID(),
-      name: newPlayerName,
-      points: 0,
-      roundPoints: 0,
-      tempInputPoints: null
+      name: newPlayerName ?? '',
+      previousScore: 0,
+      roundPoints: null
     });
   }
 
-  function resetPlayers() {
-    if (confirm('Es-tu sûr de vouloir annuler la partie et changer de joueurs ?') == true) {
-      players.value = [];
-      gameStore.gameStarted = false;
-      gameStore.enableCounting = false;
-      gameStore.roundCounter = gameStore.DEFAULT_ROUND_NUMBER;
-    }
+  function getRoundScore(player: Player): number {
+    return player.previousScore + (player.roundPoints ?? 0);
   }
 
   function updatePlayers(updatedPlayers: Player[]) {
     players.value = updatedPlayers;
   }
 
-  return { players, addPlayer, updatePlayers, resetPlayers };
+  function resetPlayers() {
+    players.value = [];
+    sessionStore.resetSession();
+    router.push({ name: ROUTE_NAMES.GAME });
+  }
+
+  return { players, addPlayer, getRoundScore, updatePlayers, resetPlayers };
 });
